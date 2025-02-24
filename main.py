@@ -1,12 +1,21 @@
 from scanner import Scanner
-from parser import Parser
+from parser import Parser  # Ensure renamed parser file
 from evaluator import Evaluator
 
-def calculate(text):
+def calculate(text):  # This parameter is fine
     scanner = Scanner(text)
     parser = Parser(scanner)
     ast = parser.parse()
     return Evaluator().evaluate(ast)
+
+def format_result(value):
+    """Format values for clear output"""
+    if isinstance(value, str):
+        return f'"{value}"'
+    elif isinstance(value, bool):
+        return 'true' if value else 'false'
+    else:
+        return str(value)
 
 if __name__ == "__main__":
     import sys
@@ -16,18 +25,20 @@ if __name__ == "__main__":
         print("Enter expressions (Ctrl+C to exit)")
         while True:
             try:
-                text = input(">>> ").strip()
-                if text:
+                # Changed variable name from 'text' to 'user_input'
+                user_input = input(">>> ").strip()
+                if user_input:
                     try:
-                        result = calculate(text)
-                        print(f"Result: {result}")
+                        result = calculate(user_input)
+                        formatted = format_result(result)
+                        print(f"Result: {formatted}")
                     except Exception as e:
                         print(f"Error: {e}")
             except KeyboardInterrupt:
                 print("\nExiting...")
                 break
 
-    # File mode if argument provided
+    # File mode remains unchanged
     elif len(sys.argv) == 2:
         try:
             with open(sys.argv[1]) as f:
@@ -36,7 +47,8 @@ if __name__ == "__main__":
                     if line:
                         try:
                             result = calculate(line)
-                            print(f"{line} = {result}")
+                            formatted = format_result(result)
+                            print(f"{line} = {formatted}")
                         except Exception as e:
                             print(f"Error: {e}")
         except FileNotFoundError:

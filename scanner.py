@@ -21,6 +21,17 @@ class Scanner:
             self.advance()
         return float(result) if has_decimal else int(result)
 
+    def _read_string(self):
+        self.advance()  # Skip opening "
+        result = ''
+        while self.current_char and self.current_char != '"':
+            result += self.current_char
+            self.advance()
+        if not self.current_char:
+            raise Exception("Unclosed string literal")
+        self.advance()  # Skip closing "
+        return result
+
     def _read_identifier(self):
         result = ''
         while self.current_char and self.current_char.isalpha():
@@ -33,6 +44,10 @@ class Scanner:
             if self.current_char.isspace():
                 self.advance()
                 continue
+
+            # Handle string literals first
+            if self.current_char == '"':
+                return Token('STRING', self._read_string())
 
             # Handle true/false/and/or
             if self.current_char.isalpha():

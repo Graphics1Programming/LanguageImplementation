@@ -1,5 +1,5 @@
 from scanner import Scanner
-from main import calculate
+from main import calculate, format_result  # Import formatting helper
 
 
 def show_tokens(text):
@@ -8,26 +8,43 @@ def show_tokens(text):
     try:
         while True:
             token = scanner.get_next_token()
-            if token.type == 'EOF': break
+            if token.type == 'EOF':
+                break
             tokens.append(str(token))  # Uses Token's __str__ method
         print("\nTokens:", " → ".join(tokens))
+        return True
     except Exception as e:
-        print(f"Token Error: {e}")
+        print(f"\nTokenization Error: {str(e)}")
         return False
-    return True
 
 
 def main():
+    print("Interactive Calculator (type 'exit' to quit)")
     while True:
-        text = input("\nEnter expression (exit to quit): ").strip()
-        if text.lower() == 'exit': break
+        try:
+            text = input("\n>>> ").strip()
+            if text.lower() == 'exit':
+                break
 
-        if show_tokens(text):  # Show tokenization first
+            if not text:
+                continue
+
+            # Show tokenization first
+            tokenization_ok = show_tokens(text)
+            if not tokenization_ok:
+                continue
+
+            # Then show evaluation
             try:
                 result = calculate(text)
-                print(f"Result: {result}")
+                formatted = format_result(result)  # Use formatting helper
+                print(f"Result: {formatted}")
             except Exception as e:
-                print(f"Error: {e}")
+                print(f"Evaluation Error: {str(e)}")
+
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            break
 
 
 if __name__ == "__main__":
