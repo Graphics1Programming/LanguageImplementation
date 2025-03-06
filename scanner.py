@@ -54,7 +54,8 @@ class Scanner:
 
     def operator(self):
         ops = [
-            ('!=', 'NEQ'), ('==', 'EQ'), ('<=', 'LTE'), ('>=', 'GTE'),
+            ('!=', 'NEQ'), ('!', 'NOT'),
+            ('==', 'EQ'), ('<=', 'LTE'), ('>=', 'GTE'),
             ('+', 'PLUS'), ('-', 'MINUS'), ('*', 'MUL'), ('/', 'DIV'),
             ('<', 'LT'), ('>', 'GT'), ('(', 'LPAREN'), (')', 'RPAREN')
         ]

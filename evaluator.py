@@ -4,19 +4,14 @@ class Evaluator:
     def evaluate(self, ast):
         return self._eval(ast)
 
-    def _are_compatible(self, a, b, allow_number_bool=False):
+    @staticmethod
+    def _are_compatible(a, b, allow_number_bool=False):
         """Check if two values are compatible for an operation."""
-        # Explicitly exclude booleans from being treated as numbers
-        def is_number(x):
-            return type(x) in (int, float)  # Use type() instead of isinstance()
-
-        def is_bool(x):
-            return type(x) is bool
-
+        # For comparisons, allow any types
         if allow_number_bool:
-            return (is_number(a) or is_bool(a)) and (is_number(b) or is_bool(b))
-        else:
-            return is_number(a) and is_number(b)
+            return True
+        # For arithmetic, both must be numbers
+        return type(a) in (int, float) and type(b) in (int, float)
 
     def _eval(self, node):
         if isinstance(node, Token):
@@ -49,9 +44,6 @@ class Evaluator:
             elif op.type in ('AND', 'OR'):
                 if not (type(left_val) is bool and type(right_val) is bool):
                     raise TypeError(f"Logical operators require booleans, got {type(left_val)} and {type(right_val)}")
-            elif op.type in ('EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE'):
-                if not self._are_compatible(left_val, right_val, allow_number_bool=True):
-                    raise TypeError(f"Cannot compare {type(left_val)} and {type(right_val)}")
 
             # Perform the operation
             if op.type == 'PLUS':
@@ -63,8 +55,13 @@ class Evaluator:
             elif op.type == 'DIV':
                 return left_val / right_val
             elif op.type == 'EQ':
+                # Return false if types differ (e.g., 1 == true → false)
+                if type(left_val) != type(right_val):
+                    return False
                 return left_val == right_val
             elif op.type == 'NEQ':
+                if type(left_val) != type(right_val):
+                    return True
                 return left_val != right_val
             elif op.type == 'LT':
                 return left_val < right_val
