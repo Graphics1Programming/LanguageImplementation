@@ -1,67 +1,40 @@
 from scanner import Scanner
-from parser import Parser  # Ensure renamed parser file
+from parser import Parser
 from evaluator import Evaluator
+from tokens import Token
 
-def calculate(text):  # This parameter is fine
-    try:
-        scanner = Scanner(text)
-        parser = Parser(scanner)
-        ast = parser.parse()
-        return Evaluator().evaluate(ast)
-    except TypeError as e:
-        raise Exception(f"Type mismatch error: {e}")
-    except SyntaxError as e:
-        raise Exception(f"Syntax error: {e}")
-    except ValueError as e:
-        raise Exception(f"Value error: {e}")
-    except Exception as e:
-        raise Exception(f"Error while calculating expression: {e}")
 
-def format_result(value):
-    """Format values for clear output"""
-    if isinstance(value, str):
-        return f'"{value}"'
-    elif isinstance(value, bool):
-        return 'true' if value else 'false'
-    else:
-        return str(value)
+def main():
+    # Example inputs
+    input_text = '3 + 5 * (2 - 1) == true'
+    print("Input Expression:", input_text)
+
+    # Initialize Scanner
+    scanner = Scanner(input_text)
+
+    # Tokenize the input
+    tokens = []
+    token = scanner.get_next_token()
+    while token.type != 'EOF':
+        tokens.append(token)
+        token = scanner.get_next_token()
+
+    print("Tokens:", tokens)
+
+    # Initialize Parser
+    parser = Parser(tokens)
+
+    # Parse the expression
+    ast = parser.parse()
+    print("Abstract Syntax Tree (AST):", ast)
+
+    # Initialize Evaluator
+    evaluator = Evaluator()
+
+    # Evaluate the AST
+    result = evaluator.evaluate(ast)
+    print("Result:", result)
+
 
 if __name__ == "__main__":
-    import sys
-
-    # Interactive mode if no arguments
-    if len(sys.argv) == 1:
-        print("Enter expressions (Ctrl+C to exit)")
-        while True:
-            try:
-                # Changed variable name from 'text' to 'user_input'
-                user_input = input(">>> ").strip()
-                if user_input:
-                    try:
-                        result = calculate(user_input)
-                        formatted = format_result(result)
-                        print(f"Result: {formatted}")
-                    except Exception as e:
-                        print(f"Error: {e}")
-            except KeyboardInterrupt:
-                print("\nExiting...")
-                break
-
-    # File mode remains unchanged
-    elif len(sys.argv) == 2:
-        try:
-            with open(sys.argv[1]) as f:
-                for line in f:
-                    line = line.strip()
-                    if line:
-                        try:
-                            result = calculate(line)
-                            formatted = format_result(result)
-                            print(f"{line} = {formatted}")
-                        except Exception as e:
-                            print(f"Error: {e}")
-        except FileNotFoundError:
-            print(f"Error: File '{sys.argv[1]}' not found")
-
-    else:
-        print("Usage: python main.py [input_file]")
+    main()

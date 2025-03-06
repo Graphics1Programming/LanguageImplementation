@@ -1,105 +1,64 @@
 from tokens import Token
-
-class ASTNode: pass
-
-class NumberNode(ASTNode):
-    def __init__(self, value): self.value = value
-
-class BoolNode(ASTNode):
-    def __init__(self, value): self.value = value
-
-class StringNode(ASTNode):
-    def __init__(self, value): self.value = value
-
-class BinOpNode(ASTNode):
-    def __init__(self, left, op, right):
-        self.left = left
-        self.op = op
-        self.right = right
-
-class UnaryOpNode(ASTNode):
-    def __init__(self, op, right):
-        self.op = op
-        self.right = right
-
 class Parser:
     def __init__(self, scanner):
         self.scanner = scanner
-        self.current_token = scanner.get_next_token()
+        self.current_token = None
+        self.advance()
 
-    def _expect(self, token_type):
-        if self.current_token.type != token_type:
-            raise Exception(f"Expected {token_type}, got {self.current_token.type}")
+    def advance(self):
+        """Advance to the next token."""
         self.current_token = self.scanner.get_next_token()
 
     def parse(self):
-        return self.logical_or()
+        """Parse the entire input."""
+        return self.expr()
 
-    # --- Corrected method order ---
-    def factor(self):
-        token = self.current_token
-        if token.type == '(':  # Updated LPAREN to '('
-            self._expect('(')
-            node = self.parse()
-            self._expect(')')
-            return node
-        elif token.type == 'NOT':
-            self._expect('NOT')
-            return UnaryOpNode(token, self.factor())
-        elif token.type == '-':  # Updated MINUS to '-'
-            self._expect('-')
-            return UnaryOpNode(Token('NEGATE', '-'), self.factor())
-        elif token.type == 'BOOL':
-            self._expect('BOOL')
-            return BoolNode(token.value)
-        elif token.type == 'NUMBER':
-            self._expect('NUMBER')
-            return NumberNode(token.value)
-        elif token.type == 'FLOAT':  # Handling the FLOAT token
-            self._expect('FLOAT')
-            return NumberNode(token.value)  # Returning as a NumberNode
-        elif token.type == 'STRING':
-            self._expect('STRING')
-            return StringNode(token.value)
-        else:
-            raise Exception(f"Unexpected token: {token.type}")
+    def expr(self):
+        """Handle the main expression parsing: addition, subtraction, and boolean logic."""
+        result = self.term()
+        while self.current_token.type in ('PLUS', 'MINUS', 'OR'):
+            token = self.current_token
+            self.advance()
+            right = self.term()
+            result = (token, result, right)
+        return result
 
     def term(self):
-        node = self.factor()
-        while self.current_token.type in ('*', '/'):  # Updated MUL and DIV to '*' and '/'
-            op = self.current_token
-            self._expect(op.type)
-            node = BinOpNode(node, op, self.factor())
-        return node
+        """Handle multiplication, division, and comparisons."""
+        result = self.factor()
+        while self.current_token.type in ('MUL', 'DIV', 'AND'):
+            token = self.current_token
+            self.advance()
+            right = self.factor()
+            result = (token, result, right)
+        return result
 
-    def arith_expr(self):
-        node = self.term()
-        while self.current_token.type in ('+', '-'):  # Updated PLUS and MINUS to '+' and '-'
-            op = self.current_token
-            self._expect(op.type)
-            node = BinOpNode(node, op, self.term())
-        return node
+    def factor(self):
+        """Handle unary negation, parentheses, and literal values."""
+        token = self.current_token
 
-    def comparison(self):
-        node = self.arith_expr()
-        while self.current_token.type in ('==', '!=', '<', '>', '<=', '>='):  # Updated to match operator symbols
-            op = self.current_token
-            self._expect(op.type)
-            node = BinOpNode(node, op, self.arith_expr())
-        return node
+        if token.type == 'MINUS':  # Unary negation
+            self.advance()
+            return ('NEGATE', self.factor())
 
-    def logical_and(self):
-        node = self.comparison()
-        while self.current_token.type == 'AND':
-            op = self.current_token
-            self._expect('AND')
-            node = BinOpNode(node, op, self.comparison())
-        return node
+        elif token.type == 'NUMBER' or token.type == 'FLOAT':
+            self.advance()
+            return token
 
-    def logical_or(self):
-        node = self.logical_and()
-        while self.current_token.type == 'OR':
-            op = self.current_token
-            self._expect('OR')
-            node = BinOpNode(node, op, self.logical_and())
-        return node
+        elif token.type == 'BOOL':
+            self.advance()
+            return token
+
+        elif token.type == 'STRING':
+            self.advance()
+            return token
+
+        elif token.type == 'LPAREN':
+            self.advance()
+            result = self.expr()
+            if self.current_token.type != 'RPAREN':
+                raise ValueError("Expected ')'")
+            self.advance()
+            return result
+
+        raise ValueError(f"Unexpected token: {token}")

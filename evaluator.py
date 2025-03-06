@@ -1,80 +1,55 @@
-from parser import NumberNode, BoolNode, StringNode, BinOpNode, UnaryOpNode
+from tokens import Token
 
 class Evaluator:
-    @staticmethod
-    def _is_numeric(a, b):
-        """Check if both operands are either int or float"""
-        return isinstance(a, (int, float)) and isinstance(b, (int, float))
+    def __init__(self, ast):
+        self.ast = ast
 
-    def _validate_operands(self, left, right, allowed_types, operator):
-        """Ensure operands match required types or are compatible"""
-        if (int in allowed_types or float in allowed_types) and self._is_numeric(left, right):
-            return  # Allow mixed int and float operations
-        if not (isinstance(left, allowed_types) and isinstance(right, allowed_types)):
-            received = f"{type(left).__name__} and {type(right).__name__}"
-            raise Exception(
-                f"{operator} requires {allowed_types[0].__name__} operands, got {received}"
-            )
+    def evaluate(self):
+        return self._eval(self.ast)
 
-    def evaluate(self, node):
-        if isinstance(node, NumberNode):
-            return node.value
-        if isinstance(node, BoolNode):
-            return node.value
-        if isinstance(node, StringNode):
-            return node.value
+    def _eval(self, node):
+        if isinstance(node, Token):
+            if node.type == 'NUMBER':
+                return node.value
+            elif node.type == 'FLOAT':
+                return node.value
+            elif node.type == 'BOOL':
+                return node.value
+            elif node.type == 'STRING':
+                return node.value
 
-        if isinstance(node, UnaryOpNode):
-            right = self.evaluate(node.right)
-            if node.op.type == 'NOT':
-                if not isinstance(right, bool):
-                    raise Exception(f"! operator requires boolean, got {type(right).__name__}")
-                return not right
-            if node.op.type == 'NEGATE':
-                if not isinstance(right, (int, float)):
-                    raise Exception(f"- operator requires number, got {type(right).__name__}")
-                return -right
+        if isinstance(node, tuple):
+            operator, left, right = node
 
-        if isinstance(node, BinOpNode):
-            left = self.evaluate(node.left)
-            right = self.evaluate(node.right)
-            op_type = node.op.type
+            if operator == 'NEGATE':
+                return not self._eval(left)
 
-            # Handle arithmetic operations
-            if op_type in ('PLUS', 'MINUS', 'MUL', 'DIV'):
-                if op_type == 'PLUS' and isinstance(left, str):
-                    self._validate_operands(left, right, (str,), '+')
-                    return left + right
-                else:
-                    self._validate_operands(left, right, (int, float), op_type)
-                    if op_type == 'DIV' and right == 0:
-                        raise Exception("Division by zero error")
-                    return {
-                        'PLUS': lambda a, b: a + b,
-                        'MINUS': lambda a, b: a - b,
-                        'MUL': lambda a, b: a * b,
-                        'DIV': lambda a, b: a / b
-                    }[op_type](left, right)
+            if operator.type == 'PLUS':
+                return self._eval(left) + self._eval(right)
+            elif operator.type == 'MINUS':
+                return self._eval(left) - self._eval(right)
+            elif operator.type == 'MUL':
+                return self._eval(left) * self._eval(right)
+            elif operator.type == 'DIV':
+                return self._eval(left) / self._eval(right)
 
-            # Handle comparisons
-            if op_type in ('EQ', 'NEQ'):
-                return {
-                    'EQ': left == right,
-                    'NEQ': left != right
-                }[op_type]
+            elif operator.type == 'EQ':
+                return self._eval(left) == self._eval(right)
+            elif operator.type == 'NEQ':
+                return self._eval(left) != self._eval(right)
+            elif operator.type == 'LT':
+                return self._eval(left) < self._eval(right)
+            elif operator.type == 'GT':
+                return self._eval(left) > self._eval(right)
+            elif operator.type == 'LTE':
+                return self._eval(left) <= self._eval(right)
+            elif operator.type == 'GTE':
+                return self._eval(left) >= self._eval(right)
 
-            if op_type in ('LT', 'GT', 'LTE', 'GTE'):
-                self._validate_operands(left, right, (int, float, str), op_type)
-                return {
-                    'LT': left < right,
-                    'GT': left > right,
-                    'LTE': left <= right,
-                    'GTE': left >= right
-                }[op_type]
+            elif operator.type == 'AND':
+                return self._eval(left) and self._eval(right)
+            elif operator.type == 'OR':
+                return self._eval(left) or self._eval(right)
 
-            # Handle logical operators
-            if op_type in ('AND', 'OR'):
-                self._validate_operands(left, right, (bool,), op_type)
-                return left and right if op_type == 'AND' else left or right
-
-        raise Exception(f"Unhandled node type: {type(node).__name__}")
+            elif operator.type == 'NOT':
+                return not self._eval(left)
