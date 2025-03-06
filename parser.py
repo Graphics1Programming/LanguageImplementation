@@ -21,6 +21,7 @@ class UnaryOpNode(ASTNode):
     def __init__(self, op, right):
         self.op = op
         self.right = right
+
 class Parser:
     def __init__(self, scanner):
         self.scanner = scanner
@@ -37,16 +38,16 @@ class Parser:
     # --- Corrected method order ---
     def factor(self):
         token = self.current_token
-        if token.type == 'LPAREN':
-            self._expect('LPAREN')
+        if token.type == '(':  # Updated LPAREN to '('
+            self._expect('(')
             node = self.parse()
-            self._expect('RPAREN')
+            self._expect(')')
             return node
         elif token.type == 'NOT':
             self._expect('NOT')
             return UnaryOpNode(token, self.factor())
-        elif token.type == 'MINUS':
-            self._expect('MINUS')
+        elif token.type == '-':  # Updated MINUS to '-'
+            self._expect('-')
             return UnaryOpNode(Token('NEGATE', '-'), self.factor())
         elif token.type == 'BOOL':
             self._expect('BOOL')
@@ -54,6 +55,9 @@ class Parser:
         elif token.type == 'NUMBER':
             self._expect('NUMBER')
             return NumberNode(token.value)
+        elif token.type == 'FLOAT':  # Handling the FLOAT token
+            self._expect('FLOAT')
+            return NumberNode(token.value)  # Returning as a NumberNode
         elif token.type == 'STRING':
             self._expect('STRING')
             return StringNode(token.value)
@@ -62,7 +66,7 @@ class Parser:
 
     def term(self):
         node = self.factor()
-        while self.current_token.type in ('MUL', 'DIV'):
+        while self.current_token.type in ('*', '/'):  # Updated MUL and DIV to '*' and '/'
             op = self.current_token
             self._expect(op.type)
             node = BinOpNode(node, op, self.factor())
@@ -70,7 +74,7 @@ class Parser:
 
     def arith_expr(self):
         node = self.term()
-        while self.current_token.type in ('PLUS', 'MINUS'):
+        while self.current_token.type in ('+', '-'):  # Updated PLUS and MINUS to '+' and '-'
             op = self.current_token
             self._expect(op.type)
             node = BinOpNode(node, op, self.term())
@@ -78,7 +82,7 @@ class Parser:
 
     def comparison(self):
         node = self.arith_expr()
-        while self.current_token.type in ('EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE'):
+        while self.current_token.type in ('==', '!=', '<', '>', '<=', '>='):  # Updated to match operator symbols
             op = self.current_token
             self._expect(op.type)
             node = BinOpNode(node, op, self.arith_expr())

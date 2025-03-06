@@ -19,7 +19,11 @@ class Scanner:
                 has_decimal = True
             result += self.current_char
             self.advance()
-        return float(result) if has_decimal else int(result)
+        # Return as float if there's a decimal point; otherwise, return as int
+        if has_decimal:
+            return Token('FLOAT', float(result))  # Returning FLOAT token
+        else:
+            return Token('NUMBER', int(result))  # Returning NUMBER token
 
     def _read_string(self):
         self.advance()  # Skip opening "
@@ -58,9 +62,9 @@ class Scanner:
                 if ident == 'or': return Token('OR')
                 raise Exception(f"Unknown identifier: {ident}")
 
-            # Handle numbers
+            # Handle numbers (both integer and floating-point)
             if self.current_char.isdigit() or self.current_char == '.':
-                return Token('NUMBER', self._read_number())
+                return self._read_number()  # Call the method for reading numbers
 
             # Handle comparisons and operators
             if self.current_char == '=':

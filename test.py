@@ -1,7 +1,5 @@
 import unittest
 from main import calculate
-
-
 class TestCalculator(unittest.TestCase):
     # ===== Stage 1 Tests =====
     def test_basic_operations(self):
@@ -85,7 +83,7 @@ class TestCalculator(unittest.TestCase):
 
         # String comparisons (lexicographical order)
         self.assertTrue(calculate("\"apple\" < \"banana\""))
-        self.assertFalse(calculate("\"zebra\" > \"apple\""))
+        self.assertTrue(calculate("\"zebra\" > \"apple\""))
         self.assertTrue(calculate("\"cat\" <= \"cat\""))
         self.assertFalse(calculate("\"dog\" >= \"elephant\""))
 

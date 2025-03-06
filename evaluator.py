@@ -47,6 +47,8 @@ class Evaluator:
                     return left + right
                 else:
                     self._validate_operands(left, right, (int, float), op_type)
+                    if op_type == 'DIV' and right == 0:
+                        raise Exception("Division by zero error")
                     return {
                         'PLUS': lambda a, b: a + b,
                         'MINUS': lambda a, b: a - b,

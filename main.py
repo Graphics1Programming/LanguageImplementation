@@ -3,10 +3,19 @@ from parser import Parser  # Ensure renamed parser file
 from evaluator import Evaluator
 
 def calculate(text):  # This parameter is fine
-    scanner = Scanner(text)
-    parser = Parser(scanner)
-    ast = parser.parse()
-    return Evaluator().evaluate(ast)
+    try:
+        scanner = Scanner(text)
+        parser = Parser(scanner)
+        ast = parser.parse()
+        return Evaluator().evaluate(ast)
+    except TypeError as e:
+        raise Exception(f"Type mismatch error: {e}")
+    except SyntaxError as e:
+        raise Exception(f"Syntax error: {e}")
+    except ValueError as e:
+        raise Exception(f"Value error: {e}")
+    except Exception as e:
+        raise Exception(f"Error while calculating expression: {e}")
 
 def format_result(value):
     """Format values for clear output"""

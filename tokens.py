@@ -1,27 +1,30 @@
 class Token:
-    TYPE_DISPLAY = {  # Fixed syntax: removed "class token"
+    TYPE_DISPLAY = {
         'LPAREN': '(',
         'RPAREN': ')',
         'NUMBER': 'NUMBER',
+        'FLOAT': 'FLOAT',
         'STRING': 'STRING',
-        'PLUS': 'PLUS',
-        'MINUS': 'MINUS',
-        'MUL': 'MUL',
-        'DIV': 'DIV',
+        'PLUS': '+',
+        'MINUS': '-',
+        'MUL': '*',
+        'DIV': '/',
         'BOOL': 'BOOL',
         'AND': 'AND',
         'OR': 'OR',
         'NOT': 'NOT',
-        'EQ': 'EQUAL_TO',
-        'NEQ': 'NOT_EQUAL',
-        'LT': 'LESS_THAN',
-        'GT': 'GREATER_THAN',
-        'LTE': 'LESS_EQUAL',
-        'GTE': 'GREATER_EQUAL',
+        'EQ': '==',
+        'NEQ': '!=',
+        'LT': '<',
+        'GT': '>',
+        'LTE': '<=',
+        'GTE': '>=',
         'EOF': 'EOF'
     }
 
     def __init__(self, type, value=None):
+        if type not in self.TYPE_DISPLAY:
+            raise ValueError(f"Invalid token type: {type}")  # Validate token type
         self.type = type
         self.value = value
 
@@ -33,5 +36,7 @@ class Token:
         if self.value is not None:
             if self.type == 'STRING':
                 return f'STRING("{self.value}")'
+            elif self.type == 'FLOAT':
+                return f'FLOAT({self.value})'
             return f"{display_type}({self.value})"
         return display_type
