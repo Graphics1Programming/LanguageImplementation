@@ -1,21 +1,20 @@
 from parser import NumberNode, BoolNode, StringNode, BinOpNode, UnaryOpNode
 
 class Evaluator:
-    @staticmethod  # Added decorator
-    def _is_same_type(a, b):
-        """Check if two values have exactly the same type (static method)"""
-        return type(a) is type(b)
+    @staticmethod
+    def _is_numeric(a, b):
+        """Check if both operands are either int or float"""
+        return isinstance(a, (int, float)) and isinstance(b, (int, float))
 
     def _validate_operands(self, left, right, allowed_types, operator):
-        """Ensure operands match required types"""
+        """Ensure operands match required types or are compatible"""
+        if (int in allowed_types or float in allowed_types) and self._is_numeric(left, right):
+            return  # Allow mixed int and float operations
         if not (isinstance(left, allowed_types) and isinstance(right, allowed_types)):
             received = f"{type(left).__name__} and {type(right).__name__}"
             raise Exception(
                 f"{operator} requires {allowed_types[0].__name__} operands, got {received}"
             )
-        if not self._is_same_type(left, right):  # Still called via self
-            received = f"{type(left).__name__} vs {type(right).__name__}"
-            raise Exception(f"Type mismatch for {operator}: {received}")
 
     def evaluate(self, node):
         if isinstance(node, NumberNode):
@@ -58,8 +57,8 @@ class Evaluator:
             # Handle comparisons
             if op_type in ('EQ', 'NEQ'):
                 return {
-                    'EQ': self._is_same_type(left, right) and (left == right),
-                    'NEQ': not self._is_same_type(left, right) or (left != right)
+                    'EQ': left == right,
+                    'NEQ': left != right
                 }[op_type]
 
             if op_type in ('LT', 'GT', 'LTE', 'GTE'):
