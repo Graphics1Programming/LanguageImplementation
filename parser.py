@@ -1,4 +1,3 @@
-from tokens import Token
 class Parser:
     def __init__(self, scanner):
         self.scanner = scanner
@@ -6,59 +5,81 @@ class Parser:
         self.advance()
 
     def advance(self):
-        """Advance to the next token."""
         self.current_token = self.scanner.get_next_token()
 
     def parse(self):
-        """Parse the entire input."""
-        return self.expr()
+        return self.logical_or()
 
-    def expr(self):
-        """Handle the main expression parsing: addition, subtraction, and boolean logic."""
-        result = self.term()
-        while self.current_token.type in ('PLUS', 'MINUS', 'OR'):
-            token = self.current_token
+    def logical_or(self):
+        """Handles OR operations (lowest precedence)."""
+        node = self.logical_and()
+        while self.current_token.type == 'OR':
+            op = self.current_token
             self.advance()
-            right = self.term()
-            result = (token, result, right)
-        return result
+            node = (op, node, self.logical_and())
+        return node
+
+    def logical_and(self):
+        """Handles AND operations."""
+        node = self.comparison()
+        while self.current_token.type == 'AND':
+            op = self.current_token
+            self.advance()
+            node = (op, node, self.comparison())
+        return node
+
+    def comparison(self):
+        """Handles comparisons (e.g., ==, <, >)."""
+        node = self.term()
+        comparison_ops = ('EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE')
+        while self.current_token.type in comparison_ops:
+            op = self.current_token
+            self.advance()
+            node = (op, node, self.term())
+        return node
 
     def term(self):
-        """Handle multiplication, division, and comparisons."""
-        result = self.factor()
-        while self.current_token.type in ('MUL', 'DIV', 'AND'):
-            token = self.current_token
+        """Handles addition and subtraction."""
+        node = self.factor()
+        while self.current_token.type in ('PLUS', 'MINUS'):
+            op = self.current_token
             self.advance()
-            right = self.factor()
-            result = (token, result, right)
-        return result
+            node = (op, node, self.factor())
+        return node
 
     def factor(self):
-        """Handle unary negation, parentheses, and literal values."""
+        """Handles multiplication and division."""
+        node = self.unary()
+        while self.current_token.type in ('MUL', 'DIV'):
+            op = self.current_token
+            self.advance()
+            node = (op, node, self.unary())
+        return node
+
+    def unary(self):
+        """Handles unary operators (e.g., -, NOT)."""
+        if self.current_token.type in ('MINUS', 'NOT'):
+            op = self.current_token
+            self.advance()
+            return op, None, self.unary()  # ✅ Fixed redundant parentheses
+        return self.primary()
+
+    def primary(self):
+        """Handles literals and parentheses."""
         token = self.current_token
 
-        if token.type == 'MINUS':  # Unary negation
-            self.advance()
-            return ('NEGATE', self.factor())
-
-        elif token.type == 'NUMBER' or token.type == 'FLOAT':
+        # Handle literals (numbers, booleans, strings)
+        if token.type in ('NUMBER', 'FLOAT', 'BOOL', 'STRING'):
             self.advance()
             return token
 
-        elif token.type == 'BOOL':
+        # Handle parentheses
+        if token.type == 'LPAREN':
             self.advance()
-            return token
-
-        elif token.type == 'STRING':
-            self.advance()
-            return token
-
-        elif token.type == 'LPAREN':
-            self.advance()
-            result = self.expr()
+            node = self.logical_or()  # Parse the expression inside
             if self.current_token.type != 'RPAREN':
                 raise ValueError("Expected ')'")
             self.advance()
-            return result
+            return node
 
         raise ValueError(f"Unexpected token: {token}")
