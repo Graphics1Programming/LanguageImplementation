@@ -61,7 +61,7 @@ class Parser:
         if self.current_token.type in ('MINUS', 'NOT'):
             op = self.current_token
             self.advance()
-            return op, None, self.unary()  # ✅ Fixed redundant parentheses
+            return op, None, self.unary()
         return self.primary()
 
     def primary(self):
