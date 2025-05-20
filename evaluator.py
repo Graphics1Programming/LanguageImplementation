@@ -1,5 +1,4 @@
 from tokens import Token
-
 class Evaluator:
     def evaluate(self, ast):
         return self._eval(ast)
@@ -53,6 +52,8 @@ class Evaluator:
             elif op.type == 'MUL':
                 return left_val * right_val
             elif op.type == 'DIV':
+                if right_val == 0:
+                    raise ZeroDivisionError("Division by zero is not allowed.")
                 return left_val / right_val
             elif op.type == 'EQ':
                 # Return false if types differ (e.g., 1 == true → false)
