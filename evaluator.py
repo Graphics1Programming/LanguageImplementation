@@ -1,16 +1,26 @@
 from tokens import Token
+from scanner import Scanner
+from parser import Parser
+
 class Evaluator:
     def evaluate(self, ast):
         return self._eval(ast)
 
     @staticmethod
-    def _are_compatible(a, b, allow_number_bool=False):
-        """Check if two values are compatible for an operation."""
-        # For comparisons, allow any types
-        if allow_number_bool:
-            return True
-        # For arithmetic, both must be numbers
-        return type(a) in (int, float) and type(b) in (int, float)
+    def _are_compatible(a, b, operator):
+        """Check if two values are compatible for an operation based on the operator."""
+        if operator == 'PLUS':
+            # Allow addition if both are numbers or both are strings
+            return (isinstance(a, (int, float)) and isinstance(b, (int, float))) or \
+                   (isinstance(a, str) and isinstance(b, str))
+        elif operator in ('MINUS', 'MUL', 'DIV'):
+            # Require both to be numbers
+            return isinstance(a, (int, float)) and isinstance(b, (int, float))
+        elif operator in ('AND', 'OR'):
+            # Require both to be booleans
+            return isinstance(a, bool) and isinstance(b, bool)
+        else:
+            return True  # For comparisons, allow any types
 
     def _eval(self, node):
         if isinstance(node, Token):
@@ -19,32 +29,31 @@ class Evaluator:
         if isinstance(node, tuple):
             op, left, right = node
 
-            # Handle unary negation (e.g., "-5")
+            # Handle unary negation
             if op.type == 'MINUS' and left is None:
                 val = self._eval(right)
                 if not isinstance(val, (int, float)):
                     raise TypeError(f"Cannot negate non-number: {val}")
                 return -val
 
-            # Handle logical NOT ("not true")
+            # Handle logical NOT
             if op.type == 'NOT':
                 operand = self._eval(right)
-                if type(operand) is not bool:
+                if not isinstance(operand, bool):
                     raise TypeError(f"Cannot apply NOT to non-boolean: {operand}")
                 return not operand
 
             left_val = self._eval(left) if left else None
             right_val = self._eval(right)
 
-            # Type checks based on operator
-            if op.type in ('PLUS', 'MINUS', 'MUL', 'DIV'):
-                if not self._are_compatible(left_val, right_val):
-                    raise TypeError(f"Unsupported operand types: {type(left_val)} and {type(right_val)}")
-            elif op.type in ('AND', 'OR'):
-                if not (type(left_val) is bool and type(right_val) is bool):
-                    raise TypeError(f"Logical operators require booleans, got {type(left_val)} and {type(right_val)}")
+            # Type checks for operators
+            if op.type in ('PLUS', 'MINUS', 'MUL', 'DIV', 'AND', 'OR'):
+                if not self._are_compatible(left_val, right_val, op.type):
+                    raise TypeError(
+                        f"Unsupported operand types: {type(left_val)} and {type(right_val)} for operator {op.type}"
+                    )
 
-            # Perform the operation
+            # Perform operations
             if op.type == 'PLUS':
                 return left_val + right_val
             elif op.type == 'MINUS':
@@ -53,16 +62,11 @@ class Evaluator:
                 return left_val * right_val
             elif op.type == 'DIV':
                 if right_val == 0:
-                    raise ZeroDivisionError("Division by zero is not allowed.")
+                    raise ZeroDivisionError("Division by zero")
                 return left_val / right_val
             elif op.type == 'EQ':
-                # Return false if types differ (e.g., 1 == true → false)
-                if type(left_val) != type(right_val):
-                    return False
                 return left_val == right_val
             elif op.type == 'NEQ':
-                if type(left_val) != type(right_val):
-                    return True
                 return left_val != right_val
             elif op.type == 'LT':
                 return left_val < right_val
@@ -78,3 +82,11 @@ class Evaluator:
                 return left_val or right_val
 
         raise Exception(f"Unknown node: {node}")
+
+evaluator_instance = Evaluator()
+
+def evaluate(expression: str):
+    scanner = Scanner(expression)
+    parser = Parser(scanner)
+    ast = parser.parse()
+    return evaluator_instance.evaluate(ast)

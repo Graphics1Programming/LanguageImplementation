@@ -11,18 +11,20 @@ class Scanner:
         self.current_char = self.text[self.position] if self.position < len(self.text) else None
 
     def skip_whitespace(self):
-        while self.current_char in (' ', '\t', '\n'):
+        while self.current_char is not None and self.current_char in (' ', '\t', '\n'):
             self.advance()
 
     def number(self):
         result = ''
-        while self.current_char and self.current_char.isdigit():
+        while self.current_char is not None and self.current_char.isdigit():
             result += self.current_char
             self.advance()
         if self.current_char == '.':
             result += '.'
             self.advance()
-            while self.current_char and self.current_char.isdigit():
+            if self.current_char is None or not self.current_char.isdigit():
+                raise ValueError(f"Invalid float literal at position {self.position}")
+            while self.current_char is not None and self.current_char.isdigit():
                 result += self.current_char
                 self.advance()
             return Token('FLOAT', float(result))
@@ -30,7 +32,7 @@ class Scanner:
 
     def identifier(self):
         value = ''
-        while self.current_char and (self.current_char.isalpha() or self.current_char == '_'):
+        while self.current_char is not None and (self.current_char.isalpha() or self.current_char == '_'):
             value += self.current_char
             self.advance()
         value_lower = value.lower()
@@ -44,18 +46,19 @@ class Scanner:
     def string(self):
         self.advance()  # Skip opening "
         result = ''
-        while self.current_char and self.current_char != '"':
+        while self.current_char is not None and self.current_char != '"':
+            # Optional: Support escape sequences here if needed
             result += self.current_char
             self.advance()
-        if not self.current_char:
-            raise ValueError("Unclosed string")
+        if self.current_char != '"':
+            raise ValueError("Unclosed string literal")
         self.advance()  # Skip closing "
         return Token('STRING', result)
 
     def operator(self):
         ops = [
-            ('!=', 'NEQ'), ('!', 'NOT'),
-            ('==', 'EQ'), ('<=', 'LTE'), ('>=', 'GTE'),
+            ('!=', 'NEQ'), ('==', 'EQ'), ('<=', 'LTE'), ('>=', 'GTE'),
+            ('!', 'NOT'),
             ('+', 'PLUS'), ('-', 'MINUS'), ('*', 'MUL'), ('/', 'DIV'),
             ('<', 'LT'), ('>', 'GT'), ('(', 'LPAREN'), (')', 'RPAREN')
         ]
@@ -68,17 +71,20 @@ class Scanner:
         raise ValueError(f"Unknown operator: {self.current_char}")
 
     def get_next_token(self):
-        self.skip_whitespace()
-        if not self.current_char:
-            return Token('EOF')
+        while self.current_char is not None:
+            if self.current_char in (' ', '\t', '\n'):
+                self.skip_whitespace()
+                continue
 
-        if self.current_char.isdigit():
-            return self.number()
+            if self.current_char.isdigit():
+                return self.number()
 
-        if self.current_char.isalpha() or self.current_char == '_':
-            return self.identifier()
+            if self.current_char.isalpha() or self.current_char == '_':
+                return self.identifier()
 
-        if self.current_char == '"':
-            return self.string()
+            if self.current_char == '"':
+                return self.string()
 
-        return self.operator()
+            return self.operator()
+
+        return Token('EOF', None)
