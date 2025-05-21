@@ -42,7 +42,7 @@ class TestStage3Text(unittest.TestCase):
         self.assertEqual(evaluate('"foo" + "bar" == "foobar"'), True)
 
     def test_text_inequality(self):
-        self.assertEqual(evaluate('"10 corgis" != "10" + "corgis"'), False)
+        self.assertEqual(evaluate('"10 corgis" != "10" + "corgis"'), True)
 
     def test_mixed_type_decision(self):
         with self.assertRaises(TypeError):

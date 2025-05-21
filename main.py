@@ -8,13 +8,16 @@ def calculate(text):
         parser = Parser(scanner)
         ast = parser.parse()
         return Evaluator().evaluate(ast)
-    except TypeError as te:  # Renamed to 'te'
+    except TypeError as te:
         raise Exception(f"Type mismatch error: {te}")
-    except SyntaxError as se:  # Renamed to 'se'
+    except SyntaxError as se:
         raise Exception(f"Syntax error: {se}")
-    except ValueError as ve:  # Renamed to 've'
+    except ValueError as ve:
         raise Exception(f"Value error: {ve}")
-    except Exception as ex:  # Renamed to 'ex'
+    except KeyboardInterrupt:
+        # Re-raise to allow graceful exit on Ctrl+C inside calculate if needed
+        raise
+    except Exception as ex:
         raise Exception(f"Error while calculating expression: {ex}")
 
 def format_result(value):
@@ -29,7 +32,6 @@ def format_result(value):
 if __name__ == "__main__":
     import sys
 
-    # Interactive mode if no arguments
     if len(sys.argv) == 1:
         print("Enter expressions (Ctrl+C to exit)")
         while True:
@@ -40,13 +42,15 @@ if __name__ == "__main__":
                         result = calculate(user_input)
                         formatted = format_result(result)
                         print(f"Result: {formatted}")
-                    except Exception as error:  # Renamed to 'error'
+                    except KeyboardInterrupt:
+                        # Propagate KeyboardInterrupt to outer try-except
+                        raise
+                    except Exception as error:
                         print(f"Error: {error}")
             except KeyboardInterrupt:
                 print("\nExiting...")
                 break
 
-    # File mode
     elif len(sys.argv) == 2:
         try:
             with open(sys.argv[1]) as f:
@@ -57,7 +61,10 @@ if __name__ == "__main__":
                             result = calculate(line)
                             formatted = format_result(result)
                             print(f"{line} = {formatted}")
-                        except Exception as error:  # Renamed to 'error'
+                        except KeyboardInterrupt:
+                            print("\nExecution interrupted by user.")
+                            break
+                        except Exception as error:
                             print(f"Error: {error}")
         except FileNotFoundError:
             print(f"Error: File '{sys.argv[1]}' not found")

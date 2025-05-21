@@ -19,8 +19,14 @@ class Evaluator:
         elif operator in ('AND', 'OR'):
             # Require both to be booleans
             return isinstance(a, bool) and isinstance(b, bool)
+        elif operator in ('EQ', 'NEQ'):
+            # Require both to be of the same type
+            return type(a) == type(b)
+        elif operator in ('LT', 'GT', 'LTE', 'GTE'):
+            # Allow only numbers for comparison
+            return isinstance(a, (int, float)) and isinstance(b, (int, float))
         else:
-            return True  # For comparisons, allow any types
+            return True
 
     def _eval(self, node):
         if isinstance(node, Token):
@@ -47,7 +53,7 @@ class Evaluator:
             right_val = self._eval(right)
 
             # Type checks for operators
-            if op.type in ('PLUS', 'MINUS', 'MUL', 'DIV', 'AND', 'OR'):
+            if op.type in ('PLUS', 'MINUS', 'MUL', 'DIV', 'AND', 'OR', 'EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE'):
                 if not self._are_compatible(left_val, right_val, op.type):
                     raise TypeError(
                         f"Unsupported operand types: {type(left_val)} and {type(right_val)} for operator {op.type}"
