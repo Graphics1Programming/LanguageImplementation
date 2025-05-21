@@ -3,7 +3,7 @@ class Token:
         'LPAREN': '(', 'RPAREN': ')', 'NUMBER': 'NUMBER', 'FLOAT': 'FLOAT',
         'STRING': 'STRING', 'PLUS': '+', 'MINUS': '-', 'MUL': '*', 'DIV': '/',
         'BOOL': 'BOOL', 'AND': 'AND', 'OR': 'OR', 'NOT': 'NOT', 'EQ': '==',
-        'NEQ': '!=', 'LT': '<', 'GT': '>', 'LTE': '<=', 'GTE': '>=', 'EOF': 'EOF'
+        'NEQ': '!=', 'LT': '<', 'GT': '>', 'LTE': '<=', 'GTE': '>=', 'PRINT': 'PRINT','EOF': 'EOF'
     }
 
     def __init__(self, token_type, value=None):

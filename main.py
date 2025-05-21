@@ -2,26 +2,28 @@ from scanner import Scanner
 from parser import Parser
 from evaluator import Evaluator
 
+evaluator = Evaluator()
+
 def calculate(text):
     try:
         scanner = Scanner(text)
         parser = Parser(scanner)
         ast = parser.parse()
-        return Evaluator().evaluate(ast)
+        return evaluator.evaluate(ast)
     except TypeError as te:
         raise Exception(f"Type mismatch error: {te}")
     except SyntaxError as se:
         raise Exception(f"Syntax error: {se}")
     except ValueError as ve:
         raise Exception(f"Value error: {ve}")
+    except ZeroDivisionError as zde:
+        raise Exception(f"Math error: {zde}")
     except KeyboardInterrupt:
-        # Re-raise to allow graceful exit on Ctrl+C inside calculate if needed
         raise
     except Exception as ex:
         raise Exception(f"Error while calculating expression: {ex}")
 
 def format_result(value):
-    """Format values for clear output"""
     if isinstance(value, str):
         return f'"{value}"'
     elif isinstance(value, bool):
@@ -40,10 +42,8 @@ if __name__ == "__main__":
                 if user_input:
                     try:
                         result = calculate(user_input)
-                        formatted = format_result(result)
-                        print(f"Result: {formatted}")
+                        print(f"Result: {format_result(result)}")
                     except KeyboardInterrupt:
-                        # Propagate KeyboardInterrupt to outer try-except
                         raise
                     except Exception as error:
                         print(f"Error: {error}")
@@ -59,8 +59,7 @@ if __name__ == "__main__":
                     if line:
                         try:
                             result = calculate(line)
-                            formatted = format_result(result)
-                            print(f"{line} = {formatted}")
+                            print(f"{line} = {format_result(result)}")
                         except KeyboardInterrupt:
                             print("\nExecution interrupted by user.")
                             break

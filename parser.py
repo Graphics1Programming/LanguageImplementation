@@ -8,10 +8,31 @@ class Parser:
         self.current_token = self.scanner.get_next_token()
 
     def parse(self):
-        node = self.logical_or()
+        """
+        Start parsing by processing statements instead of just expressions.
+        """
+        node = self.statement()
         if self.current_token.type != 'EOF':
-            raise ValueError(f"Unexpected token after expression: {self.current_token}")
+            raise ValueError(f"Unexpected token after statement: {self.current_token}")
         return node
+
+    def statement(self):
+        """
+        Parse statements. Currently supports 'print' statement or expression statements.
+        """
+        if self.current_token.type == 'PRINT':
+            return self.print_statement()
+        else:
+            return self.logical_or()
+
+    def print_statement(self):
+        """
+        Parse a print statement: print <expression>
+        """
+        op = self.current_token  # 'PRINT' token
+        self.advance()
+        expr = self.logical_or()
+        return ('PRINT', expr)
 
     def logical_or(self):
         """Handles OR operations (lowest precedence)."""

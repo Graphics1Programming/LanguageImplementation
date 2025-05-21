@@ -33,6 +33,13 @@ class Evaluator:
             return node.value
 
         if isinstance(node, tuple):
+            # Handle PRINT statement: ('PRINT', expr)
+            if node[0] == 'PRINT':
+                expr = node[1]
+                value = self._eval(expr)
+                print(value)
+                return None  # print statements do not return a value
+
             op, left, right = node
 
             # Handle unary negation

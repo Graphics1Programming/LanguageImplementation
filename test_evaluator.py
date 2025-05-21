@@ -1,5 +1,7 @@
 import unittest
-from evaluator import evaluate  # Make sure evaluator.py has an `evaluate()` function
+from io import StringIO
+import sys
+from evaluator import evaluate
 
 class TestStage1Arithmetic(unittest.TestCase):
     def test_subtraction(self):
@@ -51,6 +53,38 @@ class TestStage3Text(unittest.TestCase):
         with self.assertRaises(TypeError):
             evaluate('false == "false"')
 
+class TestStage4Print(unittest.TestCase):
+    def test_print_number(self):
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        evaluate("print(5 + 3)")
+        sys.stdout = sys.__stdout__
+        self.assertEqual(captured_output.getvalue().strip(), "8")
+
+    def test_print_boolean(self):
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        evaluate("print(true and false)")
+        sys.stdout = sys.__stdout__
+        self.assertEqual(captured_output.getvalue().strip(), "False")
+
+    def test_print_text(self):
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        evaluate('print("hello " + "world")')
+        sys.stdout = sys.__stdout__
+        self.assertEqual(captured_output.getvalue().strip(), "hello world")
+
+    def test_print_nested_expression(self):
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        evaluate('print((2 + 3) * (1 + 1))')
+        sys.stdout = sys.__stdout__
+        self.assertEqual(captured_output.getvalue().strip(), "10")
+
 
 if __name__ == "__main__":
     unittest.main()
+
+
+

@@ -38,7 +38,7 @@ class Scanner:
         value_lower = value.lower()
         if value_lower in ('true', 'false'):
             return Token('BOOL', value_lower == 'true')
-        elif value_lower in ('and', 'or', 'not'):
+        elif value_lower in ('and', 'or', 'not', 'print'):
             return Token(value_lower.upper(), value_lower)
         else:
             raise ValueError(f"Unknown identifier: {value}")
