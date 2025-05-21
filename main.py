@@ -2,22 +2,18 @@ from scanner import Scanner
 from parser import Parser
 from evaluator import Evaluator
 
-evaluator = Evaluator()
-
 def calculate(text):
     try:
         scanner = Scanner(text)
         parser = Parser(scanner)
         ast = parser.parse()
-        return evaluator.evaluate(ast)
+        return Evaluator().evaluate(ast)
     except TypeError as te:
         raise Exception(f"Type mismatch error: {te}")
     except SyntaxError as se:
         raise Exception(f"Syntax error: {se}")
     except ValueError as ve:
         raise Exception(f"Value error: {ve}")
-    except ZeroDivisionError as zde:
-        raise Exception(f"Math error: {zde}")
     except KeyboardInterrupt:
         raise
     except Exception as ex:
@@ -42,7 +38,9 @@ if __name__ == "__main__":
                 if user_input:
                     try:
                         result = calculate(user_input)
-                        print(f"Result: {format_result(result)}")
+                        if result is not None:
+                            formatted = format_result(result)
+                            print(f"Result: {formatted}")
                     except KeyboardInterrupt:
                         raise
                     except Exception as error:
@@ -59,7 +57,9 @@ if __name__ == "__main__":
                     if line:
                         try:
                             result = calculate(line)
-                            print(f"{line} = {format_result(result)}")
+                            if result is not None:
+                                formatted = format_result(result)
+                                print(f"{line} = {formatted}")
                         except KeyboardInterrupt:
                             print("\nExecution interrupted by user.")
                             break

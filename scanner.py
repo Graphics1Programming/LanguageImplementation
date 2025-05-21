@@ -32,16 +32,23 @@ class Scanner:
 
     def identifier(self):
         value = ''
-        while self.current_char is not None and (self.current_char.isalpha() or self.current_char == '_'):
+        if self.current_char.isalpha() or self.current_char == '_':
             value += self.current_char
             self.advance()
+        else:
+            raise ValueError("Invalid identifier start")
+
+        while self.current_char is not None and (self.current_char.isalnum() or self.current_char == '_'):
+            value += self.current_char
+            self.advance()
+
         value_lower = value.lower()
         if value_lower in ('true', 'false'):
             return Token('BOOL', value_lower == 'true')
         elif value_lower in ('and', 'or', 'not', 'print'):
             return Token(value_lower.upper(), value_lower)
         else:
-            raise ValueError(f"Unknown identifier: {value}")
+            return Token('IDENTIFIER', value)
 
     def string(self):
         self.advance()  # Skip opening "

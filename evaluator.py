@@ -1,55 +1,60 @@
 from tokens import Token
-from scanner import Scanner
-from parser import Parser
 
 class Evaluator:
+    def __init__(self):
+        self.variables = {}  # Store variable names and their values
+
     def evaluate(self, ast):
         return self._eval(ast)
 
     @staticmethod
     def _are_compatible(a, b, operator):
-        """Check if two values are compatible for an operation based on the operator."""
         if operator == 'PLUS':
-            # Allow addition if both are numbers or both are strings
             return (isinstance(a, (int, float)) and isinstance(b, (int, float))) or \
                    (isinstance(a, str) and isinstance(b, str))
         elif operator in ('MINUS', 'MUL', 'DIV'):
-            # Require both to be numbers
             return isinstance(a, (int, float)) and isinstance(b, (int, float))
         elif operator in ('AND', 'OR'):
-            # Require both to be booleans
             return isinstance(a, bool) and isinstance(b, bool)
         elif operator in ('EQ', 'NEQ'):
-            # Require both to be of the same type
             return type(a) == type(b)
         elif operator in ('LT', 'GT', 'LTE', 'GTE'):
-            # Allow only numbers for comparison
             return isinstance(a, (int, float)) and isinstance(b, (int, float))
         else:
             return True
 
     def _eval(self, node):
         if isinstance(node, Token):
+            if node.type == 'IDENT':
+                var_name = node.value
+                if var_name in self.variables:
+                    return self.variables[var_name]
+                else:
+                    raise ValueError(f"Unknown identifier: {var_name}")
             return node.value
 
         if isinstance(node, tuple):
-            # Handle PRINT statement: ('PRINT', expr)
             if node[0] == 'PRINT':
                 expr = node[1]
                 value = self._eval(expr)
                 print(value)
-                return None  # print statements do not return a value
+                return None
+
+            if node[0] == 'ASSIGN':
+                var_token = node[1]
+                expr = node[2]
+                value = self._eval(expr)
+                self.variables[var_token.value] = value
+                return value
 
             op, left, right = node
 
-            # Handle unary negation
             if op.type == 'MINUS' and left is None:
                 val = self._eval(right)
                 if not isinstance(val, (int, float)):
                     raise TypeError(f"Cannot negate non-number: {val}")
                 return -val
 
-            # Handle logical NOT
             if op.type == 'NOT':
                 operand = self._eval(right)
                 if not isinstance(operand, bool):
@@ -59,14 +64,12 @@ class Evaluator:
             left_val = self._eval(left) if left else None
             right_val = self._eval(right)
 
-            # Type checks for operators
             if op.type in ('PLUS', 'MINUS', 'MUL', 'DIV', 'AND', 'OR', 'EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE'):
                 if not self._are_compatible(left_val, right_val, op.type):
                     raise TypeError(
                         f"Unsupported operand types: {type(left_val)} and {type(right_val)} for operator {op.type}"
                     )
 
-            # Perform operations
             if op.type == 'PLUS':
                 return left_val + right_val
             elif op.type == 'MINUS':
@@ -95,11 +98,3 @@ class Evaluator:
                 return left_val or right_val
 
         raise Exception(f"Unknown node: {node}")
-
-evaluator_instance = Evaluator()
-
-def evaluate(expression: str):
-    scanner = Scanner(expression)
-    parser = Parser(scanner)
-    ast = parser.parse()
-    return evaluator_instance.evaluate(ast)
