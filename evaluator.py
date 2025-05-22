@@ -16,8 +16,17 @@ class Evaluator:
             # Do not allow None operands for PLUS
             if a is None or b is None:
                 return False
-            # Allow string + string, number + number, or mixed (string + number)
-            return isinstance(a, (int, float, str)) and isinstance(b, (int, float, str))
+
+            # Strict typing for PLUS:
+            # Allow number + number or string + string only
+            if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+                return True
+            if isinstance(a, str) and isinstance(b, str):
+                return True
+
+            # Otherwise (e.g., number + string or string + number) not allowed
+            return False
+
         elif operator in ('MINUS', 'MUL', 'DIV'):
             return isinstance(a, (int, float)) and isinstance(b, (int, float))
         elif operator in ('AND', 'OR'):
@@ -117,10 +126,12 @@ class Evaluator:
                     if left_val is None or right_val is None:
                         raise TypeError(f"Cannot add NoneType operands: {left_val} + {right_val}")
 
-                    # If one operand is string, do string concatenation for both
-                    if isinstance(left_val, str) or isinstance(right_val, str):
-                        return str(left_val) + str(right_val)
-                    return left_val + right_val
+                    # Only allow string+string or number+number (enforced above)
+                    if isinstance(left_val, str) and isinstance(right_val, str):
+                        return left_val + right_val
+                    else:
+                        return left_val + right_val
+
                 elif op_type == 'MINUS':
                     return left_val - right_val
                 elif op_type == 'MUL':
@@ -148,8 +159,10 @@ class Evaluator:
 
         raise Exception(f"Unknown AST node encountered: {node}")
 
+
 # Single instance of evaluator for reuse
 evaluator_instance = Evaluator()
+
 
 def evaluate(expression: str):
     scanner = Scanner(expression)
