@@ -7,58 +7,126 @@ class Parser:
     def advance(self):
         self.current_token = self.scanner.get_next_token()
 
+    def peek_next_token(self):
+        # Peek next token without advancing the current token
+        return self.scanner.peek_next_token()
+
     def parse(self):
-        """
-        Start parsing by processing statements instead of just expressions.
-        """
-        node = self.statement()
-        if self.current_token.type != 'EOF':
-            raise ValueError(f"Unexpected token after statement: {self.current_token}")
-        return node
+        statements = []
+        while self.current_token.type != 'EOF':
+            stmt = self.statement()
+            statements.append(stmt)
+        return ('BLOCK', statements)
 
     def statement(self):
-        """
-        Parse statements. Currently supports 'print' statement or expression statements.
-        """
-        if self.current_token.type == 'PRINT':
+        # Handle statements: make (DECL), print, if, while, assignment, or expression statement
+        if self.current_token.type == 'MAKE':  # Variable assignment with 'make'
+            return self.make_statement()
+        elif self.current_token.type == 'PRINT':
             return self.print_statement()
+        elif self.current_token.type == 'IF':
+            return self.if_statements()
+        elif self.current_token.type == 'WHILE':
+            return self.while_statement()
+        elif self.current_token.type == 'VARIABLE':
+            # Lookahead for assignment without 'make'
+            next_token = self.peek_next_token()
+            if next_token.type == 'ASSIGN':
+                # Parse assignment like: x = expr
+                var_token = self.current_token
+                self.advance()  # consume variable
+                self.advance()  # consume '='
+                expr = self.boolean_expression()
+                return ('ASSIGN', var_token, expr)
+            else:
+                # Not assignment, parse as expression statement
+                return self.boolean_expression()
         else:
-            return self.logical_or()
+            # Expression statement
+            return self.boolean_expression()
+
+    def make_statement(self):
+        self.advance()  # skip 'make'
+        if self.current_token.type != 'VARIABLE':
+            raise ValueError("Expected variable name after 'make'")
+        var_token = self.current_token
+        self.advance()
+        if self.current_token.type != 'ASSIGN':
+            raise ValueError("Expected '=' after variable in make statement")
+        self.advance()  # skip '='
+        expr = self.boolean_expression()
+        return ('ASSIGN', var_token, expr)
 
     def print_statement(self):
-        """
-        Parse a print statement: print <expression>
-        """
-        op = self.current_token  # 'PRINT' token
-        self.advance()
-        expr = self.logical_or()
+        self.advance()  # skip 'print'
+        expr = self.boolean_expression()
         return ('PRINT', expr)
 
-    def logical_or(self):
-        """Handles OR operations (lowest precedence)."""
-        node = self.logical_and()
-        while self.current_token.type == 'OR':
+    def if_statements(self):
+        conditions = []
+        actions = []
+
+        self.advance()  # skip 'if'
+        cond = self.boolean_expression()
+        if self.current_token.type != 'DO':
+            raise ValueError("Expected 'do' after if condition")
+        self.advance()  # skip 'do'
+        action = self.statement()
+        conditions.append(cond)
+        actions.append(action)
+
+        while self.current_token.type == 'ELIF':
+            self.advance()  # skip 'elif'
+            cond = self.boolean_expression()
+            if self.current_token.type != 'DO':
+                raise ValueError("Expected 'do' after elif condition")
+            self.advance()  # skip 'do'
+            action = self.statement()
+            conditions.append(cond)
+            actions.append(action)
+
+        else_action = None
+        if self.current_token.type == 'ELSE':
+            self.advance()  # skip 'else'
+            if self.current_token.type != 'DO':
+                raise ValueError("Expected 'do' after else")
+            self.advance()  # skip 'do'
+            else_action = self.statement()
+
+        return ('IF', conditions, actions, else_action)
+
+    def while_statement(self):
+        self.advance()  # skip 'while'
+        condition = self.boolean_expression()
+        if self.current_token.type != 'DO':
+            raise ValueError("Expected 'do' after while condition")
+        self.advance()  # skip 'do'
+        action = self.statement()
+        return ('WHILE', condition, action)
+
+    # Expression parsing follows precedence and associativity
+    def boolean_expression(self):
+        node = self.comp_expression()
+        while self.current_token.type in ('AND', 'OR'):
             op = self.current_token
             self.advance()
-            right = self.logical_and()
+            right = self.comp_expression()
             node = (op, node, right)
         return node
 
-    def logical_and(self):
-        """Handles AND operations."""
-        node = self.comparison()
-        while self.current_token.type == 'AND':
-            op = self.current_token
-            self.advance()
-            right = self.comparison()
-            node = (op, node, right)
-        return node
-
-    def comparison(self):
-        """Handles comparisons (e.g., ==, <, >)."""
-        node = self.term()
-        comparison_ops = ('EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE')
+    def comp_expression(self):
+        node = self.expression()
+        comparison_ops = ('EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE', 'CMP')
         while self.current_token.type in comparison_ops:
+            op = self.current_token
+            self.advance()
+            right = self.expression()
+            node = (op, node, right)
+        return node
+
+    def expression(self):
+        node = self.term()
+        while self.current_token.type in ('PLUS', 'MINUS'):
             op = self.current_token
             self.advance()
             right = self.term()
@@ -66,9 +134,8 @@ class Parser:
         return node
 
     def term(self):
-        """Handles addition and subtraction."""
         node = self.factor()
-        while self.current_token.type in ('PLUS', 'MINUS'):
+        while self.current_token.type in ('MUL', 'DIV'):
             op = self.current_token
             self.advance()
             right = self.factor()
@@ -76,38 +143,29 @@ class Parser:
         return node
 
     def factor(self):
-        """Handles multiplication and division."""
-        node = self.unary()
-        while self.current_token.type in ('MUL', 'DIV'):
-            op = self.current_token
-            self.advance()
-            right = self.unary()
-            node = (op, node, right)
-        return node
-
-    def unary(self):
-        """Handles unary operators (e.g., -, NOT)."""
-        if self.current_token.type in ('MINUS', 'NOT'):
-            op = self.current_token
-            self.advance()
-            operand = self.unary()
-            return (op, None, operand)
-        return self.primary()
-
-    def primary(self):
-        """Handles literals and parentheses."""
         token = self.current_token
 
         if token.type in ('NUMBER', 'FLOAT', 'BOOL', 'STRING'):
             self.advance()
             return token
 
-        if token.type == 'LPAREN':
+        elif token.type == 'VARIABLE':
             self.advance()
-            node = self.logical_or()  # Parse the expression inside parentheses
+            return token
+
+        elif token.type == 'LPAREN':
+            self.advance()
+            node = self.boolean_expression()
             if self.current_token.type != 'RPAREN':
                 raise ValueError("Expected ')'")
             self.advance()
             return node
 
-        raise ValueError(f"Unexpected token: {token}")
+        elif token.type in ('MINUS', 'NOT'):
+            op = token
+            self.advance()
+            operand = self.factor()
+            return (op, None, operand)
+
+        else:
+            raise ValueError(f"Unexpected token in factor: {token}")

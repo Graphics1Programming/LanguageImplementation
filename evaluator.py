@@ -1,98 +1,154 @@
 from tokens import Token
 from scanner import Scanner
 from parser import Parser
+from data import Data  # Your variable storage class
 
 class Evaluator:
+    def __init__(self):
+        self.data = Data()  # Variable storage
+
     def evaluate(self, ast):
         return self._eval(ast)
 
     @staticmethod
     def _are_compatible(a, b, operator):
         if operator == 'PLUS':
-            return (isinstance(a, (int, float)) and isinstance(b, (int, float))) or \
-                (isinstance(a, str) and isinstance(b, str))
+            # Do not allow None operands for PLUS
+            if a is None or b is None:
+                return False
+            # Allow string + string, number + number, or mixed (string + number)
+            return isinstance(a, (int, float, str)) and isinstance(b, (int, float, str))
         elif operator in ('MINUS', 'MUL', 'DIV'):
             return isinstance(a, (int, float)) and isinstance(b, (int, float))
         elif operator in ('AND', 'OR'):
             return isinstance(a, bool) and isinstance(b, bool)
         elif operator in ('EQ', 'NEQ'):
-            # Allow number comparisons across int and float
             if isinstance(a, (int, float)) and isinstance(b, (int, float)):
                 return True
             return type(a) == type(b)
         elif operator in ('LT', 'GT', 'LTE', 'GTE'):
             return isinstance(a, (int, float)) and isinstance(b, (int, float))
         else:
-            return True
+            return True  # Default: no strict checks
 
     def _eval(self, node):
+        # If node is a Token
         if isinstance(node, Token):
+            if node.type == 'VARIABLE':
+                try:
+                    return self.data.read(node)
+                except KeyError:
+                    raise NameError(f"Variable '{node.value}' is not defined.")
             return node.value
 
+        # If node is a tuple (AST node)
         if isinstance(node, tuple):
-            # Handle PRINT statement: ('PRINT', expr)
-            if node[0] == 'PRINT':
+            tag = node[0]
+
+            if tag == 'BLOCK':
+                result = None
+                for stmt in node[1]:
+                    result = self._eval(stmt)
+                return result
+
+            if tag == 'ASSIGN':
+                var_token = node[1]
+                expr = node[2]
+                value = self._eval(expr)
+                self.data.write(var_token, value)
+                return None
+
+            if tag == 'PRINT':
                 expr = node[1]
                 value = self._eval(expr)
                 print(value)
-                return None  # print statements do not return a value
+                return None
 
-            op, left, right = node
+            if tag == 'IF':
+                conditions = node[1]
+                actions = node[2]
+                else_action = node[3]
+                for cond, action in zip(conditions, actions):
+                    if self._eval(cond):
+                        return self._eval(action)
+                if else_action:
+                    return self._eval(else_action)
+                return None
 
-            # Handle unary negation
-            if op.type == 'MINUS' and left is None:
-                val = self._eval(right)
-                if not isinstance(val, (int, float)):
-                    raise TypeError(f"Cannot negate non-number: {val}")
-                return -val
+            if tag == 'WHILE':
+                condition = node[1]
+                action = node[2]
+                result = None
+                while self._eval(condition):
+                    result = self._eval(action)
+                return result
 
-            # Handle logical NOT
-            if op.type == 'NOT':
-                operand = self._eval(right)
-                if not isinstance(operand, bool):
-                    raise TypeError(f"Cannot apply NOT to non-boolean: {operand}")
-                return not operand
+            # For operation nodes: assume form (operator, left, right)
+            if len(node) == 3:
+                op, left, right = node
 
-            left_val = self._eval(left) if left else None
-            right_val = self._eval(right)
+                # op can be a Token or string; unify:
+                op_type = op.type if isinstance(op, Token) else op
 
-            # Type checks for operators
-            if op.type in ('PLUS', 'MINUS', 'MUL', 'DIV', 'AND', 'OR', 'EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE'):
-                if not self._are_compatible(left_val, right_val, op.type):
-                    raise TypeError(
-                        f"Unsupported operand types: {type(left_val)} and {type(right_val)} for operator {op.type}"
-                    )
+                # Unary operators: left is None
+                if op_type == 'MINUS' and left is None:
+                    val = self._eval(right)
+                    if not isinstance(val, (int, float)):
+                        raise TypeError(f"Cannot negate non-number: {val}")
+                    return -val
 
-            # Perform operations
-            if op.type == 'PLUS':
-                return left_val + right_val
-            elif op.type == 'MINUS':
-                return left_val - right_val
-            elif op.type == 'MUL':
-                return left_val * right_val
-            elif op.type == 'DIV':
-                if right_val == 0:
-                    raise ZeroDivisionError("Division by zero")
-                return left_val / right_val
-            elif op.type == 'EQ':
-                return left_val == right_val
-            elif op.type == 'NEQ':
-                return left_val != right_val
-            elif op.type == 'LT':
-                return left_val < right_val
-            elif op.type == 'GT':
-                return left_val > right_val
-            elif op.type == 'LTE':
-                return left_val <= right_val
-            elif op.type == 'GTE':
-                return left_val >= right_val
-            elif op.type == 'AND':
-                return left_val and right_val
-            elif op.type == 'OR':
-                return left_val or right_val
+                if op_type == 'NOT' and left is None:
+                    operand = self._eval(right)
+                    if not isinstance(operand, bool):
+                        raise TypeError(f"Cannot apply NOT to non-boolean: {operand}")
+                    return not operand
 
-        raise Exception(f"Unknown node: {node}")
+                left_val = self._eval(left) if left is not None else None
+                right_val = self._eval(right)
 
+                if op_type in ('PLUS', 'MINUS', 'MUL', 'DIV', 'AND', 'OR', 'EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE'):
+                    if not self._are_compatible(left_val, right_val, op_type):
+                        raise TypeError(
+                            f"Unsupported operand types: {type(left_val).__name__} and {type(right_val).__name__} for operator {op_type}"
+                        )
+
+                # Evaluate binary operations
+                if op_type == 'PLUS':
+                    if left_val is None or right_val is None:
+                        raise TypeError(f"Cannot add NoneType operands: {left_val} + {right_val}")
+
+                    # If one operand is string, do string concatenation for both
+                    if isinstance(left_val, str) or isinstance(right_val, str):
+                        return str(left_val) + str(right_val)
+                    return left_val + right_val
+                elif op_type == 'MINUS':
+                    return left_val - right_val
+                elif op_type == 'MUL':
+                    return left_val * right_val
+                elif op_type == 'DIV':
+                    if right_val == 0:
+                        raise ZeroDivisionError("Division by zero")
+                    return left_val / right_val
+                elif op_type == 'EQ':
+                    return left_val == right_val
+                elif op_type == 'NEQ':
+                    return left_val != right_val
+                elif op_type == 'LT':
+                    return left_val < right_val
+                elif op_type == 'GT':
+                    return left_val > right_val
+                elif op_type == 'LTE':
+                    return left_val <= right_val
+                elif op_type == 'GTE':
+                    return left_val >= right_val
+                elif op_type == 'AND':
+                    return left_val and right_val
+                elif op_type == 'OR':
+                    return left_val or right_val
+
+        raise Exception(f"Unknown AST node encountered: {node}")
+
+# Single instance of evaluator for reuse
 evaluator_instance = Evaluator()
 
 def evaluate(expression: str):

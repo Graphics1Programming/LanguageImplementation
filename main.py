@@ -2,12 +2,16 @@ from scanner import Scanner
 from parser import Parser
 from evaluator import Evaluator
 
+# Create one Evaluator instance globally to preserve variable state
+evaluator_instance = Evaluator()
+
 def calculate(text):
     try:
         scanner = Scanner(text)
         parser = Parser(scanner)
         ast = parser.parse()
-        return Evaluator().evaluate(ast)
+        # Use the global evaluator instance for evaluation
+        return evaluator_instance.evaluate(ast)
     except TypeError as te:
         raise Exception(f"Type mismatch error: {te}")
     except SyntaxError as se:
@@ -15,7 +19,6 @@ def calculate(text):
     except ValueError as ve:
         raise Exception(f"Value error: {ve}")
     except KeyboardInterrupt:
-        # Re-raise to allow graceful exit on Ctrl+C inside calculate if needed
         raise
     except Exception as ex:
         raise Exception(f"Error while calculating expression: {ex}")
@@ -45,7 +48,6 @@ if __name__ == "__main__":
                             formatted = format_result(result)
                             print(f"Result: {formatted}")
                     except KeyboardInterrupt:
-                        # Propagate KeyboardInterrupt to outer try-except
                         raise
                     except Exception as error:
                         print(f"Error: {error}")

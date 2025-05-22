@@ -1,14 +1,26 @@
 class Token:
     TYPE_DISPLAY = {
+        # Groupings
         'LPAREN': '(', 'RPAREN': ')',
         'NUMBER': 'NUMBER', 'FLOAT': 'FLOAT',
         'STRING': 'STRING', 'BOOL': 'BOOL',
-        'IDENTIFIER': 'IDENTIFIER',
+        'IDENTIFIER': 'IDENTIFIER', 'VARIABLE': 'variable',
+
+        # Operators
         'PLUS': '+', 'MINUS': '-', 'MUL': '*', 'DIV': '/',
         'EQ': '==', 'NEQ': '!=', 'LT': '<', 'GT': '>',
-        'LTE': '<=', 'GTE': '>=',
+        'LTE': '<=', 'GTE': '>=', 'QMARK_EQ': '?=',
+
+        # Logical
         'AND': 'AND', 'OR': 'OR', 'NOT': 'NOT',
-        'PRINT': 'PRINT', 'EOF': 'EOF'
+
+        # Keywords / Control
+        'PRINT': 'PRINT', 'MAKE': 'MAKE',
+        'IF': 'IF', 'ELIF': 'ELIF', 'ELSE': 'ELSE',
+        'WHILE': 'WHILE', 'DO': 'DO',
+
+        # Special
+        'ASSIGN': '=', 'EOF': 'EOF'
     }
 
     def __init__(self, token_type, value=None):
