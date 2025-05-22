@@ -1,7 +1,7 @@
 from tokens import Token
 from scanner import Scanner
 from parser import Parser
-from data import Data  # Your variable storage class
+from data import Data  # variable storage class
 
 class Evaluator:
     def __init__(self):
@@ -13,7 +13,7 @@ class Evaluator:
     @staticmethod
     def _are_compatible(a, b, operator):
         if operator == 'PLUS':
-            # Do not allow None operands for PLUS
+            # Not allow None operands for PLUS
             if a is None or b is None:
                 return False
 
@@ -160,7 +160,7 @@ class Evaluator:
         raise Exception(f"Unknown AST node encountered: {node}")
 
 
-# Single instance of evaluator for reuse
+# Single instance of evaluator
 evaluator_instance = Evaluator()
 
 

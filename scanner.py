@@ -71,7 +71,7 @@ class Scanner:
         return Token('STRING', result)
 
     def operator(self):
-        # Order is important: longer symbols first to avoid premature matches
+        # longer symbols first to avoid premature matches
         ops = [
             ('!=', 'NEQ'), ('==', 'EQ'), ('<=', 'LTE'), ('>=', 'GTE'), ('?=', 'QMARK_EQ'),
             ('!', 'NOT'), ('+', 'PLUS'), ('-', 'MINUS'), ('*', 'MUL'), ('/', 'DIV'),
@@ -86,7 +86,7 @@ class Scanner:
         raise ValueError(f"Unknown operator or character: '{self.current_char}' at position {self.position}")
 
     def get_next_token(self):
-        # If we have a peeked token, return it and clear the cache
+        # for a peeked token, return it and clear the cache
         if self._peeked_token is not None:
             token = self._peeked_token
             self._peeked_token = None
@@ -111,7 +111,7 @@ class Scanner:
         return Token('EOF', None)
 
     def peek_next_token(self):
-        # If we already peeked, return cached token
+        # for peeked, return cached token
         if self._peeked_token is not None:
             return self._peeked_token
 
