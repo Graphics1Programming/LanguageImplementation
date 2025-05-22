@@ -1,7 +1,7 @@
 import unittest
 from io import StringIO
 import sys
-from evaluator import evaluate  # Make sure evaluator.py has an `evaluate()` function
+from evaluator import evaluate
 
 class TestStage1Arithmetic(unittest.TestCase):
     def test_subtraction(self):
@@ -83,6 +83,46 @@ class TestStage4Print(unittest.TestCase):
         sys.stdout = sys.__stdout__
         self.assertEqual(captured_output.getvalue().strip(), "10")
 
+    def test_quickMaths(self):
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        evaluate("""
+    quickMaths = 10
+    quickMaths = quickMaths + 2
+    print(quickMaths)
+    """)
+        sys.stdout = sys.__stdout__
+        self.assertEqual(captured_output.getvalue().strip(), "12")
+
+    def test_floatTest(self):
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        evaluate("""
+    floatTest = 1.0
+    floatTest = floatTest + 5
+    print(floatTest)
+    """)
+        sys.stdout = sys.__stdout__
+        self.assertEqual(captured_output.getvalue().strip(), "6.0")
+
+    def test_stringCatTest(self):
+        with self.assertRaises(TypeError):
+            evaluate("""
+    stringCatTest = "10 corgis"
+    stringCatTest = stringCatTest + 5 + " more corgis"
+    print(stringCatTest)
+    """)
+
+    def test_errorTest_mixed_type_addition(self):
+        with self.assertRaises(TypeError):
+            evaluate("""
+    errorTest = 5
+    errorTest = errorTest + "insert string here"
+    print(errorTest)
+    """)
 
 if __name__ == "__main__":
-    unittest.main()
+        unittest.main()
+
+
+
