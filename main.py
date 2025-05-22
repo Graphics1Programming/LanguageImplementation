@@ -15,11 +15,13 @@ def calculate(text):
     except ValueError as ve:
         raise Exception(f"Value error: {ve}")
     except KeyboardInterrupt:
+        # Re-raise to allow graceful exit on Ctrl+C inside calculate if needed
         raise
     except Exception as ex:
         raise Exception(f"Error while calculating expression: {ex}")
 
 def format_result(value):
+    """Format values for clear output"""
     if isinstance(value, str):
         return f'"{value}"'
     elif isinstance(value, bool):
@@ -38,10 +40,12 @@ if __name__ == "__main__":
                 if user_input:
                     try:
                         result = calculate(user_input)
+                        # Only print result if not None (e.g., skip print() outputs)
                         if result is not None:
                             formatted = format_result(result)
                             print(f"Result: {formatted}")
                     except KeyboardInterrupt:
+                        # Propagate KeyboardInterrupt to outer try-except
                         raise
                     except Exception as error:
                         print(f"Error: {error}")
@@ -57,6 +61,7 @@ if __name__ == "__main__":
                     if line:
                         try:
                             result = calculate(line)
+                            # Only print result if not None (skip print() output)
                             if result is not None:
                                 formatted = format_result(result)
                                 print(f"{line} = {formatted}")

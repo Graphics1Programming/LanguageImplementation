@@ -8,100 +8,103 @@ class Parser:
         self.current_token = self.scanner.get_next_token()
 
     def parse(self):
-        """Parses a sequence of statements (including assignments and prints)."""
-        statements = []
-        while self.current_token.type != 'EOF':
-            stmt = self.statement()
-            statements.append(stmt)
-        return 'BLOCK', statements
+        """
+        Start parsing by processing statements instead of just expressions.
+        """
+        node = self.statement()
+        if self.current_token.type != 'EOF':
+            raise ValueError(f"Unexpected token after statement: {self.current_token}")
+        return node
 
     def statement(self):
-        """Parse a print statement, assignment, or expression."""
-        if self.current_token.type == 'IDENTIFIER':
-            var_token = self.current_token
-            self.advance()
-            if self.current_token.type == 'EQ':  # '=' operator
-                self.advance()
-                expr = self.logical_or()
-                return 'ASSIGN', var_token.value, expr
-            else:
-                raise ValueError("Expected '=' after identifier")
-
-        elif self.current_token.type == 'PRINT':
+        """
+        Parse statements. Currently supports 'print' statement or expression statements.
+        """
+        if self.current_token.type == 'PRINT':
             return self.print_statement()
-
         else:
             return self.logical_or()
 
     def print_statement(self):
-        """Parse a print statement: print <expression>"""
-        self.advance()  # skip 'PRINT'
+        """
+        Parse a print statement: print <expression>
+        """
+        op = self.current_token  # 'PRINT' token
+        self.advance()
         expr = self.logical_or()
-        return 'PRINT', expr
+        return ('PRINT', expr)
 
     def logical_or(self):
+        """Handles OR operations (lowest precedence)."""
         node = self.logical_and()
         while self.current_token.type == 'OR':
-            op = self.current_token.type
+            op = self.current_token
             self.advance()
             right = self.logical_and()
-            node = op, node, right
+            node = (op, node, right)
         return node
 
     def logical_and(self):
+        """Handles AND operations."""
         node = self.comparison()
         while self.current_token.type == 'AND':
-            op = self.current_token.type
+            op = self.current_token
             self.advance()
             right = self.comparison()
-            node = op, node, right
+            node = (op, node, right)
         return node
 
     def comparison(self):
+        """Handles comparisons (e.g., ==, <, >)."""
         node = self.term()
-        while self.current_token.type in ('EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE'):
-            op = self.current_token.type
+        comparison_ops = ('EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE')
+        while self.current_token.type in comparison_ops:
+            op = self.current_token
             self.advance()
             right = self.term()
-            node = op, node, right
+            node = (op, node, right)
         return node
 
     def term(self):
+        """Handles addition and subtraction."""
         node = self.factor()
         while self.current_token.type in ('PLUS', 'MINUS'):
-            op = self.current_token.type
+            op = self.current_token
             self.advance()
             right = self.factor()
-            node = op, node, right
+            node = (op, node, right)
         return node
 
     def factor(self):
+        """Handles multiplication and division."""
         node = self.unary()
         while self.current_token.type in ('MUL', 'DIV'):
-            op = self.current_token.type
+            op = self.current_token
             self.advance()
             right = self.unary()
-            node = op, node, right
+            node = (op, node, right)
         return node
 
     def unary(self):
+        """Handles unary operators (e.g., -, NOT)."""
         if self.current_token.type in ('MINUS', 'NOT'):
-            op = self.current_token.type
+            op = self.current_token
             self.advance()
             operand = self.unary()
-            return op, None, operand
+            return (op, None, operand)
         return self.primary()
 
     def primary(self):
+        """Handles literals and parentheses."""
         token = self.current_token
 
-        if token.type in ('NUMBER', 'FLOAT', 'BOOL', 'STRING', 'IDENTIFIER'):
+        if token.type in ('NUMBER', 'FLOAT', 'BOOL', 'STRING'):
             self.advance()
             return token
 
         if token.type == 'LPAREN':
             self.advance()
-            node = self.logical_or()
+            node = self.logical_or()  # Parse the expression inside parentheses
             if self.current_token.type != 'RPAREN':
                 raise ValueError("Expected ')'")
             self.advance()

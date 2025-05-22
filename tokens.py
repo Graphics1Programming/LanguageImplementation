@@ -1,9 +1,14 @@
 class Token:
     TYPE_DISPLAY = {
-        'LPAREN': '(', 'RPAREN': ')', 'NUMBER': 'NUMBER', 'FLOAT': 'FLOAT',
-        'STRING': 'STRING', 'PLUS': '+', 'MINUS': '-', 'MUL': '*', 'DIV': '/',
-        'BOOL': 'BOOL', 'AND': 'AND', 'OR': 'OR', 'NOT': 'NOT', 'EQ': '==',
-        'NEQ': '!=', 'LT': '<', 'GT': '>', 'LTE': '<=', 'GTE': '>=', 'PRINT': 'PRINT','EOF': 'EOF'
+        'LPAREN': '(', 'RPAREN': ')',
+        'NUMBER': 'NUMBER', 'FLOAT': 'FLOAT',
+        'STRING': 'STRING', 'BOOL': 'BOOL',
+        'IDENTIFIER': 'IDENTIFIER',
+        'PLUS': '+', 'MINUS': '-', 'MUL': '*', 'DIV': '/',
+        'EQ': '==', 'NEQ': '!=', 'LT': '<', 'GT': '>',
+        'LTE': '<=', 'GTE': '>=',
+        'AND': 'AND', 'OR': 'OR', 'NOT': 'NOT',
+        'PRINT': 'PRINT', 'EOF': 'EOF'
     }
 
     def __init__(self, token_type, value=None):
@@ -13,7 +18,7 @@ class Token:
         self.value = value
 
     def __repr__(self):
-        return f"Token({self.type}, {self.value})"
+        return f"Token({self.type}, {repr(self.value)})"
 
     def __str__(self):
         display_type = self.TYPE_DISPLAY.get(self.type, self.type)

@@ -1,7 +1,7 @@
 import unittest
 from io import StringIO
 import sys
-from evaluator import evaluate
+from evaluator import evaluate  # Make sure evaluator.py has an `evaluate()` function
 
 class TestStage1Arithmetic(unittest.TestCase):
     def test_subtraction(self):
@@ -53,6 +53,7 @@ class TestStage3Text(unittest.TestCase):
         with self.assertRaises(TypeError):
             evaluate('false == "false"')
 
+
 class TestStage4Print(unittest.TestCase):
     def test_print_number(self):
         captured_output = StringIO()
@@ -85,6 +86,3 @@ class TestStage4Print(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-
-
