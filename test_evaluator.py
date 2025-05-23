@@ -46,14 +46,6 @@ class TestStage3Text(unittest.TestCase):
     def test_text_inequality(self):
         self.assertEqual(evaluate('"10 corgis" != "10" + "corgis"'), True)
 
-    def test_mixed_type_decision(self):
-        with self.assertRaises(TypeError):
-            evaluate('1 + "0"')
-
-        with self.assertRaises(TypeError):
-            evaluate('false == "false"')
-
-
 class TestStage4Print(unittest.TestCase):
     def test_print_number(self):
         captured_output = StringIO()

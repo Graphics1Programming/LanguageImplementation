@@ -3,6 +3,12 @@ from scanner import Scanner
 from parser import Parser
 from data import Data  # variable storage class
 
+class VariableNotDefinedError(NameError):
+    pass
+
+class TypeConversionError(TypeError):
+    pass
+
 class Evaluator:
     def __init__(self):
         self.data = Data()  # Variable storage
@@ -13,18 +19,11 @@ class Evaluator:
     @staticmethod
     def _are_compatible(a, b, operator):
         if operator == 'PLUS':
-            # Not allow None operands for PLUS
-            if a is None or b is None:
-                return False
-
-            # Strict typing for PLUS:
-            # Allow number + number or string + string only
-            if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-                return True
+            # Allow only same-type or numeric + numeric
             if isinstance(a, str) and isinstance(b, str):
                 return True
-
-            # Otherwise (e.g., number + string or string + number) not allowed
+            if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+                return True
             return False
 
         elif operator in ('MINUS', 'MUL', 'DIV'):
@@ -32,25 +31,21 @@ class Evaluator:
         elif operator in ('AND', 'OR'):
             return isinstance(a, bool) and isinstance(b, bool)
         elif operator in ('EQ', 'NEQ'):
-            if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-                return True
-            return type(a) == type(b)
+            return True
         elif operator in ('LT', 'GT', 'LTE', 'GTE'):
             return isinstance(a, (int, float)) and isinstance(b, (int, float))
         else:
-            return True  # Default: no strict checks
+            return True
 
     def _eval(self, node):
-        # If node is a Token
         if isinstance(node, Token):
             if node.type == 'VARIABLE':
                 try:
                     return self.data.read(node)
                 except KeyError:
-                    raise NameError(f"Variable '{node.value}' is not defined.")
+                    raise VariableNotDefinedError(f"Variable '{node.value}' is not defined.")
             return node.value
 
-        # If node is a tuple (AST node)
         if isinstance(node, tuple):
             tag = node[0]
 
@@ -92,46 +87,38 @@ class Evaluator:
                     result = self._eval(action)
                 return result
 
-            # For operation nodes: assume form (operator, left, right)
+            if tag == 'DEL':
+                var_token = node[1]
+                self.data.delete(var_token)
+                return None
+
             if len(node) == 3:
                 op, left, right = node
-
-                # op can be a Token or string; unify:
                 op_type = op.type if isinstance(op, Token) else op
 
-                # Unary operators: left is None
                 if op_type == 'MINUS' and left is None:
                     val = self._eval(right)
                     if not isinstance(val, (int, float)):
-                        raise TypeError(f"Cannot negate non-number: {val}")
+                        raise TypeConversionError(f"Cannot negate non-number: {val}")
                     return -val
 
                 if op_type == 'NOT' and left is None:
                     operand = self._eval(right)
                     if not isinstance(operand, bool):
-                        raise TypeError(f"Cannot apply NOT to non-boolean: {operand}")
+                        raise TypeConversionError(f"Cannot apply NOT to non-boolean: {operand}")
                     return not operand
 
                 left_val = self._eval(left) if left is not None else None
                 right_val = self._eval(right)
 
-                if op_type in ('PLUS', 'MINUS', 'MUL', 'DIV', 'AND', 'OR', 'EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE'):
+                if op_type in ('PLUS', 'MINUS', 'MUL', 'DIV', 'AND', 'OR', 'LT', 'GT', 'LTE', 'GTE'):
                     if not self._are_compatible(left_val, right_val, op_type):
-                        raise TypeError(
+                        raise TypeConversionError(
                             f"Unsupported operand types: {type(left_val).__name__} and {type(right_val).__name__} for operator {op_type}"
                         )
 
-                # Evaluate binary operations
                 if op_type == 'PLUS':
-                    if left_val is None or right_val is None:
-                        raise TypeError(f"Cannot add NoneType operands: {left_val} + {right_val}")
-
-                    # Only allow string+string or number+number (enforced above)
-                    if isinstance(left_val, str) and isinstance(right_val, str):
-                        return left_val + right_val
-                    else:
-                        return left_val + right_val
-
+                    return left_val + right_val
                 elif op_type == 'MINUS':
                     return left_val - right_val
                 elif op_type == 'MUL':
@@ -141,8 +128,12 @@ class Evaluator:
                         raise ZeroDivisionError("Division by zero")
                     return left_val / right_val
                 elif op_type == 'EQ':
+                    if type(left_val) != type(right_val):
+                        return False
                     return left_val == right_val
                 elif op_type == 'NEQ':
+                    if type(left_val) != type(right_val):
+                        return True
                     return left_val != right_val
                 elif op_type == 'LT':
                     return left_val < right_val
@@ -159,10 +150,8 @@ class Evaluator:
 
         raise Exception(f"Unknown AST node encountered: {node}")
 
-
 # Single instance of evaluator
 evaluator_instance = Evaluator()
-
 
 def evaluate(expression: str):
     scanner = Scanner(expression)

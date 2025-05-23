@@ -19,9 +19,11 @@ class Parser:
         return ('BLOCK', statements)
 
     def statement(self):
-        # Handle statements: make (DECL), print, if, while, assignment, or expression statement
+        # Handle statements: make (DECL), del, print, if, while, assignment, or expression statement
         if self.current_token.type == 'MAKE':  # Variable assignment with 'make'
             return self.make_statement()
+        elif self.current_token.type == 'DEL':  # Variable deletion with 'del'
+            return self.del_statement()
         elif self.current_token.type == 'PRINT':
             return self.print_statement()
         elif self.current_token.type == 'IF':
@@ -56,6 +58,14 @@ class Parser:
         self.advance()  # skip '='
         expr = self.boolean_expression()
         return ('ASSIGN', var_token, expr)
+
+    def del_statement(self):
+        self.advance()  # skip 'del'
+        if self.current_token.type != 'VARIABLE':
+            raise ValueError("Expected variable name after 'del'")
+        var_token = self.current_token
+        self.advance()
+        return ('DEL', var_token)
 
     def print_statement(self):
         self.advance()  # skip 'print'

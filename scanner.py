@@ -14,6 +14,7 @@ class Scanner:
         'else': ('ELSE', 'else'),
         'do': ('DO', 'do'),
         'while': ('WHILE', 'while'),
+        'del': ('DEL', 'del'),
     }
 
     def __init__(self, text):
