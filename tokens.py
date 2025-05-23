@@ -19,6 +19,9 @@ class Token:
         'IF': 'IF', 'ELIF': 'ELIF', 'ELSE': 'ELSE',
         'WHILE': 'WHILE', 'DO': 'DO',
 
+        # New keyword for delete
+        'DEL': 'DEL',
+
         # Special
         'ASSIGN': '=', 'EOF': 'EOF'
     }
