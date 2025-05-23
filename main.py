@@ -1,9 +1,15 @@
 from scanner import Scanner
 from parser import Parser
 from evaluator import Evaluator
+import os
 
 # Create one Evaluator instance globally to preserve variable state
 evaluator_instance = Evaluator()
+
+def clear_screen():
+    """Clear the terminal screen, works on Windows and Unix."""
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("[Screen cleared]")
 
 def calculate(text):
     """
@@ -22,9 +28,6 @@ def calculate(text):
         raise Exception(f"Syntax error: {se}")
     except ValueError as ve:
         raise Exception(f"Value error: {ve}")
-    except KeyboardInterrupt:
-        # Allow keyboard interrupts to propagate for clean exit
-        raise
     except Exception as ex:
         # General catch-all for unexpected errors during calculation
         raise Exception(f"Error while calculating expression: {ex}")
@@ -48,27 +51,34 @@ if __name__ == "__main__":
 
     # No command-line arguments: start interactive REPL mode
     if len(sys.argv) == 1:
-        print("Enter expressions (Ctrl+C to exit)")
+        print("Enter expressions (type 'exit' or 'quit' to stop, 'clear' to clear screen)")
         while True:
             try:
                 user_input = input(">>> ").strip()
-                if user_input:
-                    try:
-                        result = calculate(user_input)
-                        # Print the result if it is not None (e.g., skip print() statements)
-                        if result is not None:
-                            formatted = format_result(result)
-                            print(f"Result: {formatted}")
-                    except KeyboardInterrupt:
-                        # Allow Ctrl+C to interrupt input and exit REPL
-                        raise
-                    except Exception as error:
-                        # Print any calculation errors without stopping the REPL
-                        print(f"Error: {error}")
+                if not user_input:
+                    continue
+
+                # Exit commands
+                if user_input.lower() in ('exit', 'quit'):
+                    print("Exiting...")
+                    break
+
+                # Clear screen command
+                if user_input.lower() == 'clear':
+                    clear_screen()
+                    continue
+
+                try:
+                    result = calculate(user_input)
+                    if result is not None:
+                        formatted = format_result(result)
+                        print(f"Result: {formatted}")
+                except Exception as error:
+                    print(f"Error: {error}")
+
             except KeyboardInterrupt:
-                # Graceful exit message on Ctrl+C from input prompt
-                print("\nExiting...")
-                break
+                # Ignore Ctrl+C (do not exit)
+                print("\nKeyboardInterrupt ignored. Use 'exit' or 'quit' to stop.")
 
     # One command-line argument: treat as filename and execute line-by-line
     elif len(sys.argv) == 2:
@@ -76,11 +86,9 @@ if __name__ == "__main__":
             with open(sys.argv[1]) as f:
                 for line in f:
                     line = line.strip()
-                    # Ignore empty lines or lines starting with '#' (comments)
                     if line and not line.startswith('#'):
                         try:
                             result = calculate(line)
-                            # Print result for non-None values
                             if result is not None:
                                 formatted = format_result(result)
                                 print(f"{line} = {formatted}")
@@ -88,11 +96,9 @@ if __name__ == "__main__":
                             print("\nExecution interrupted by user.")
                             break
                         except Exception as error:
-                            # Print errors for individual lines but continue processing
                             print(f"Error: {error}")
         except FileNotFoundError:
             print(f"Error: File '{sys.argv[1]}' not found")
 
-    # More than one command-line argument: show usage information
     else:
         print("Usage: python main.py [input_file]")
