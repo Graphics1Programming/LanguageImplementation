@@ -60,7 +60,8 @@ if __name__ == "__main__":
             with open(sys.argv[1]) as f:
                 for line in f:
                     line = line.strip()
-                    if line:
+                    # Skip empty lines and comments starting with '#'
+                    if line and not line.startswith('#'):
                         try:
                             result = calculate(line)
                             # Only print result if not None (skip print() output)

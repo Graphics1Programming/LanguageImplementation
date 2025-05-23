@@ -1,9 +1,10 @@
+# Stage 1 Basic Calculator
 1 - 2
 2.5 + 2.5 - 1.25
 (10 * 2) / 6
 8.5 / (2 * 9) - -3
--5 + (3 * 2)
-(4 + 5) * (7 - 2) / -3
+
+# Stage 2 Boolean Logic
 true == false
 true != false
 (5 < 10)
@@ -12,37 +13,36 @@ true and true
 false and true
 (0 < 1) or false
 false or false
-!(true or false) and (10 >= 5)
+
+# Stage 3: Text Values
 "hello" + " " + "world"
 "foo" + "bar" == "foobar"
 "10 corgis" != "10" + "corgis"
-"number " + "5"
-"test" == "test"
-"True" != true
+
+# Stage 4: Global Data
 quickMaths = 10
 quickMaths = quickMaths + 2
 print quickMaths
+
 floatTest = 1.0
 floatTest = floatTest + 5
 print floatTest
+
 stringCatTest = "10 corgis"
 stringCatTest = stringCatTest + 5 + " more corgis"
 print stringCatTest
+
 errorTest = 5
 errorTest = errorTest + "insert string here"
 print errorTest
-boolTest = true
-boolTest = !boolTest
-print boolTest
-mixedTest = 10
-mixedTest = mixedTest + " apples"
-print mixedTest
-numVar = 5
-numVar = numVar - 3
-print numVar
-textVar = "cat"
-textVar = textVar + "dog"
-print textVar
+
+
+
+
+
+
+
+
 
 
 
