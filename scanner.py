@@ -15,6 +15,7 @@ class Scanner:
         'elif': ('ELIF', 'elif'),
         'else': ('ELSE', 'else'),
         'while': ('WHILE', 'while'),
+        'break': ('BREAK', 'break'),
         'del': ('DEL', 'del'),
         'input': ('INPUT', 'input'),
         'int': ('INT', 'int'),

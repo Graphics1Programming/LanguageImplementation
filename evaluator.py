@@ -11,6 +11,11 @@ class VariableNotDefinedError(NameError):
 class TypeConversionError(TypeError):
     pass
 
+# Custom exception to handle break in loops
+class BreakException(Exception):
+    pass
+
+
 class Evaluator:
     def __init__(self):
         # Data instance to hold variables and their values
@@ -124,7 +129,10 @@ class Evaluator:
                 action = node[2]
                 result = None
                 while self._eval(condition):
-                    result = self._eval(action)
+                    try:
+                        result = self._eval(action)
+                    except BreakException:
+                        break
                 return result
 
             # Handle deletion of variables
@@ -132,6 +140,9 @@ class Evaluator:
                 var_token = node[1]
                 self.data.delete(var_token)
                 return None
+
+            if tag == 'BREAK':
+                raise BreakException()
 
             # Handle binary and unary operations with two or three tuple elements
             if len(node) == 3:

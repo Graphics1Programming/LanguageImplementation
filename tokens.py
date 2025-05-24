@@ -45,6 +45,7 @@ class Token:
         'ELIF': 'ELIF',         # Else-if statement keyword
         'ELSE': 'ELSE',         # Else statement keyword
         'WHILE': 'WHILE',       # While loop keyword
+        'BREAK': 'BREAK',       # Break statement keyword
 
         # New keyword for deletion operations
         'DEL': 'DEL',           # Delete keyword
