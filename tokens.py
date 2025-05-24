@@ -5,7 +5,10 @@ class Token:
     TYPE_DISPLAY = {
         # Groupings - used for syntax grouping in expressions/statements
         'LPAREN': '(',          # Left parenthesis
-        'RPAREN': ')',          # Right parenthesis
+        'RPAREN': ')',
+        'LBRACE': '{',
+        'RBRACE': '}',
+        # Right parenthesis
         'NUMBER': 'NUMBER',     # Integer numbers
         'FLOAT': 'FLOAT',       # Floating point numbers
         'STRING': 'STRING',     # String literals
@@ -33,12 +36,13 @@ class Token:
 
         # Keywords and control flow commands for the language
         'PRINT': 'PRINT',       # Print statement keyword
-        'MAKE': 'MAKE',         # Possibly variable declaration or assignment keyword
+        'MAKE': 'MAKE',
+        'INPUT': 'INPUT',
+        # Possibly variable declaration or assignment keyword
         'IF': 'IF',             # If statement keyword
         'ELIF': 'ELIF',         # Else-if statement keyword
         'ELSE': 'ELSE',         # Else statement keyword
         'WHILE': 'WHILE',       # While loop keyword
-        'DO': 'DO',             # Do loop keyword
 
         # New keyword for deletion operations
         'DEL': 'DEL',           # Delete keyword

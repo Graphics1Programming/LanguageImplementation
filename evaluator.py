@@ -91,6 +91,12 @@ class Evaluator:
                 print(value)
                 return None
 
+            # Handle input statement: read input from user with prompt
+            if tag == 'INPUT':
+                prompt_expr = node[1]
+                prompt_value = self._eval(prompt_expr)
+                return input(str(prompt_value))
+
             # Handle if-elif-else control flow
             if tag == 'IF':
                 conditions = node[1]
@@ -182,7 +188,7 @@ class Evaluator:
                 elif op_type == 'OR':
                     return left_val or right_val
 
-        # If node structure is not recognized, raise an error
+        # If node structure is not recognised, raise an error
         raise Exception(f"Unknown AST node encountered: {node}")
 
 # Create a single global instance of Evaluator for reuse

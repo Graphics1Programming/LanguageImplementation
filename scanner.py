@@ -14,14 +14,14 @@ class Scanner:
         'if': ('IF', 'if'),
         'elif': ('ELIF', 'elif'),
         'else': ('ELSE', 'else'),
-        'do': ('DO', 'do'),
         'while': ('WHILE', 'while'),
         'del': ('DEL', 'del'),
+        'input': ('INPUT', 'input'),
     }
 
     def __init__(self, text):
         """
-        Initialize the scanner with the input text.
+        Initialise the scanner with the input text.
         Set the starting position and current character.
         """
         self.text = text
@@ -116,7 +116,7 @@ class Scanner:
         ops = [
             ('!=', 'NEQ'), ('==', 'EQ'), ('<=', 'LTE'), ('>=', 'GTE'), ('?=', 'QMARK_EQ'),
             ('!', 'NOT'), ('+', 'PLUS'), ('-', 'MINUS'), ('*', 'MUL'), ('/', 'DIV'),
-            ('<', 'LT'), ('>', 'GT'), ('=', 'ASSIGN'), ('(', 'LPAREN'), (')', 'RPAREN')
+            ('<', 'LT'), ('>', 'GT'), ('=', 'ASSIGN'), ('(', 'LPAREN'), (')', 'RPAREN'), ('{', 'LBRACE'), ('}', 'RBRACE')
         ]
         for symbol, token_type in ops:
             end = self.position + len(symbol)

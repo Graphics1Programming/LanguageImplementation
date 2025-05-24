@@ -17,7 +17,8 @@ def calculate(text):
     Returns the evaluated result or raises an appropriate exception.
     """
     try:
-        scanner = Scanner(text)          # Tokenize the input text
+        scanner = Scanner(text)
+        # Tokenize the input text
         parser = Parser(scanner)         # Parse tokens into an abstract syntax tree (AST)
         ast = parser.parse()             # Generate the AST
         # Evaluate the AST using the global evaluator instance
@@ -46,6 +47,18 @@ def format_result(value):
     else:
         return str(value)
 
+def read_multiline_input(prompt=">>> "):
+    lines = []
+    open_braces = 0
+    while True:
+        line = input(prompt)
+        lines.append(line)
+        open_braces += line.count("{") - line.count("}")
+        if open_braces <= 0 and line.strip() != "":
+            break
+        prompt = "... "  # continuation prompt
+    return "\n".join(lines)
+
 if __name__ == "__main__":
     import sys
 
@@ -54,7 +67,7 @@ if __name__ == "__main__":
         print("Enter expressions (type 'exit' or 'quit' to stop, 'clear' to clear screen)")
         while True:
             try:
-                user_input = input(">>> ").strip()
+                user_input = read_multiline_input().strip()
                 if not user_input:
                     continue
 
@@ -84,19 +97,14 @@ if __name__ == "__main__":
     elif len(sys.argv) == 2:
         try:
             with open(sys.argv[1]) as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith('#'):
-                        try:
-                            result = calculate(line)
-                            if result is not None:
-                                formatted = format_result(result)
-                                print(f"{line} = {formatted}")
-                        except KeyboardInterrupt:
-                            print("\nExecution interrupted by user.")
-                            break
-                        except Exception as error:
-                            print(f"Error: {error}")
+                text = f.read()  # read entire file content as a single string
+                try:
+                    result = calculate(text)
+                    if result is not None:
+                        formatted = format_result(result)
+                        print(f"Result: {formatted}")
+                except Exception as error:
+                    print(f"Error: {error}")
         except FileNotFoundError:
             print(f"Error: File '{sys.argv[1]}' not found")
 
