@@ -95,13 +95,30 @@ class Scanner:
     def string(self):
         """
         Parse a string literal enclosed in double quotes.
+        Handles escape sequences like \n, \t, \", and \\.
         Raises ValueError if string is not properly closed.
-        Returns a STRING token with the content inside the quotes.
+        Returns a STRING token with the interpreted content.
         """
         self.advance()  # Skip opening quote "
         result = ''
         while self.current_char is not None and self.current_char != '"':
-            result += self.current_char
+            if self.current_char == '\\':
+                self.advance()
+                if self.current_char is None:
+                    raise ValueError("Unclosed string literal with escape")
+                if self.current_char == 'n':
+                    result += '\n'
+                elif self.current_char == 't':
+                    result += '\t'
+                elif self.current_char == '"':
+                    result += '"'
+                elif self.current_char == '\\':
+                    result += '\\'
+                else:
+                    # For unsupported escape sequences, include them literally
+                    result += '\\' + self.current_char
+            else:
+                result += self.current_char
             self.advance()
         if self.current_char != '"':
             raise ValueError("Unclosed string literal")
