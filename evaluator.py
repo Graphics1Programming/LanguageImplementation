@@ -33,9 +33,10 @@ class Evaluator:
             if isinstance(a, (int, float)) and isinstance(b, (int, float)):
                 return True
             return False
-
         elif operator in ('MINUS', 'MUL', 'DIV'):
             # Numeric operations require both operands to be numbers
+            return isinstance(a, (int, float)) and isinstance(b, (int, float))
+        elif operator == 'MOD':
             return isinstance(a, (int, float)) and isinstance(b, (int, float))
         elif operator in ('AND', 'OR'):
             # Logical operations require boolean operands
@@ -68,6 +69,14 @@ class Evaluator:
 
         if isinstance(node, tuple):
             tag = node[0]
+
+            if tag == 'INT_CAST':
+                expr = node[1]
+                val = self._eval(expr)
+                try:
+                    return int(val)
+                except (ValueError, TypeError) as e:
+                    raise TypeConversionError(f"Cannot cast value {val} to int: {e}")
 
             # Evaluate a block of statements sequentially, return last result
             if tag == 'BLOCK':
@@ -159,7 +168,6 @@ class Evaluator:
                     if isinstance(left_val, str) or isinstance(right_val, str):
                         return str(left_val) + str(right_val)
                     return left_val + right_val
-
                 elif op_type == 'MINUS':
                     return left_val - right_val
                 elif op_type == 'MUL':
@@ -168,6 +176,10 @@ class Evaluator:
                     if right_val == 0:
                         raise ZeroDivisionError("Division by zero")
                     return left_val / right_val
+                elif op_type == 'MOD':
+                    if right_val == 0:
+                        raise ZeroDivisionError("Division by zero in modulus operation")
+                    return left_val % right_val
                 elif op_type == 'EQ':
                     # Equality: different types always return False
                     if type(left_val) != type(right_val):

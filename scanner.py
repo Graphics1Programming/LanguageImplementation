@@ -17,6 +17,7 @@ class Scanner:
         'while': ('WHILE', 'while'),
         'del': ('DEL', 'del'),
         'input': ('INPUT', 'input'),
+        'int': ('INT', 'int'),
     }
 
     def __init__(self, text):
@@ -83,6 +84,7 @@ class Scanner:
         while self.current_char is not None and (self.current_char.isalnum() or self.current_char == '_'):
             value += self.current_char
             self.advance()
+
         value_lower = value.lower()
         if value_lower in self.keywords:
             token_type, token_val = self.keywords[value_lower]
@@ -106,32 +108,24 @@ class Scanner:
         return Token('STRING', result)
 
     def operator(self):
-        """
-        Parse operators and punctuation symbols.
-        Longer operators are matched first to avoid partial matches (e.g. '!=' before '!').
-        Returns the corresponding operator token.
-        Raises ValueError if the character sequence is unknown.
-        """
-        # Ordered list of operators and their token types
         ops = [
             ('!=', 'NEQ'), ('==', 'EQ'), ('<=', 'LTE'), ('>=', 'GTE'), ('?=', 'QMARK_EQ'),
-            ('!', 'NOT'), ('+', 'PLUS'), ('-', 'MINUS'), ('*', 'MUL'), ('/', 'DIV'),
-            ('<', 'LT'), ('>', 'GT'), ('=', 'ASSIGN'), ('(', 'LPAREN'), (')', 'RPAREN'), ('{', 'LBRACE'), ('}', 'RBRACE')
+            ('!', 'NOT'), ('+', 'PLUS'), ('-', 'MINUS'), ('*', 'MUL'), ('/', 'DIV'), ('%', 'MOD'),
+            ('<', 'LT'), ('>', 'GT'), ('=', 'ASSIGN'), ('(', 'LPAREN'), (')', 'RPAREN'), ('{', 'LBRACE'),
+            ('}', 'RBRACE')
         ]
         for symbol, token_type in ops:
             end = self.position + len(symbol)
-            # Check if the next characters match the operator symbol
             if self.text[self.position:end] == symbol:
                 for _ in range(len(symbol)):
                     self.advance()
                 return Token(token_type, symbol)
-        # If no known operator matched, raise error
         raise ValueError(f"Unknown operator or character: '{self.current_char}' at position {self.position}")
 
     def get_next_token(self):
         """
         Retrieve the next token from the input text.
-        Handles skipping whitespace, detecting numbers, identifiers,
+        Handles skipping whitespace, comments, detecting numbers, identifiers,
         strings, operators, and returns EOF token at the end.
         Supports returning a cached peeked token if available.
         """
@@ -147,6 +141,16 @@ class Scanner:
             if self.current_char in (' ', '\t', '\n', '\r'):
                 self.skip_whitespace()
                 continue
+
+            # Skip comments starting with #
+            if self.current_char == '#':
+                # Skip everything until end of line or end of input
+                while self.current_char is not None and self.current_char != '\n':
+                    self.advance()
+                # After skipping comment line, skip the newline char too
+                if self.current_char == '\n':
+                    self.advance()
+                continue  # Continue to next token
 
             # Number token (int or float)
             if self.current_char.isdigit():

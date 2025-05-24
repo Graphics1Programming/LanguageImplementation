@@ -168,28 +168,42 @@ class Parser:
 
     def term(self):
         node = self.factor()
-        while self.current_token.type in ('MUL', 'DIV'):
+        while self.current_token.type in ('MUL', 'DIV', 'MOD'):
             op = self.current_token
             self.advance()
             right = self.factor()
-            node = (op, node, right)
+            node = (op, node, right)  # left and right can be tokens or tuples (nodes)
         return node
 
     def factor(self):
         token = self.current_token
 
-        # Prevent parsing past block delimiters and control tokens in expressions
+        # Stop parsing factor on block delimiters or control tokens
         if token.type in ('RBRACE', 'LBRACE', 'ELSE', 'ELIF', 'EOF'):
-            # Stop expression parsing here
             raise StopIteration("End of expression reached due to block delimiter or control token")
 
         if token.type in ('NUMBER', 'FLOAT', 'BOOL', 'STRING'):
             self.advance()
             return token
 
-        elif token.type == 'VARIABLE':
-            self.advance()
-            return token
+        # Handle both VARIABLE and INT token types for 'int' keyword
+        elif token.type in ('VARIABLE', 'INT'):
+            if token.value == 'int':
+                next_token = self.peek_next_token()
+                if next_token.type == 'LPAREN':
+                    self.advance()  # consume 'int'
+                    self.advance()  # consume '('
+                    expr = self.boolean_expression()  # parse expression inside int()
+                    if self.current_token.type != 'RPAREN':
+                        raise ValueError("Expected ')' after int() argument")
+                    self.advance()  # consume ')'
+                    return ('INT_CAST', expr)
+                else:
+                    self.advance()
+                    return token
+            else:
+                self.advance()
+                return token
 
         elif token.type == 'LPAREN':
             self.advance()
@@ -213,15 +227,14 @@ class Parser:
 
     def parse_input_expression(self):
         self.advance()  # consume 'INPUT'
-
         if self.current_token.type != 'LPAREN':
-            raise ValueError("Expected '(' after input")
-        self.advance()
+            raise ValueError("Expected '(' after 'input'")
+        self.advance()  # consume '('
 
         prompt_expr = self.boolean_expression()
 
         if self.current_token.type != 'RPAREN':
-            raise ValueError("Expected ')' after input prompt")
-        self.advance()
+            raise ValueError("Expected ')' after input prompt expression")
+        self.advance()  # consume ')'
 
         return ('INPUT', prompt_expr)

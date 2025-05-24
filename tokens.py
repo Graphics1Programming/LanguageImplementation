@@ -5,10 +5,9 @@ class Token:
     TYPE_DISPLAY = {
         # Groupings - used for syntax grouping in expressions/statements
         'LPAREN': '(',          # Left parenthesis
-        'RPAREN': ')',
-        'LBRACE': '{',
-        'RBRACE': '}',
-        # Right parenthesis
+        'RPAREN': ')',          # Right parenthesis
+        'LBRACE': '{',          # Left braces
+        'RBRACE': '}',          # Right braces
         'NUMBER': 'NUMBER',     # Integer numbers
         'FLOAT': 'FLOAT',       # Floating point numbers
         'STRING': 'STRING',     # String literals
@@ -28,6 +27,7 @@ class Token:
         'LTE': '<=',            # Less than or equal to comparison operator
         'GTE': '>=',            # Greater than or equal to comparison operator
         'QMARK_EQ': '?=',       # Custom operator, possibly conditional assignment
+        'MOD': '%',             # Modulus operator token
 
         # Logical operators for boolean logic
         'AND': 'AND',           # Logical AND
@@ -38,6 +38,8 @@ class Token:
         'PRINT': 'PRINT',       # Print statement keyword
         'MAKE': 'MAKE',
         'INPUT': 'INPUT',
+        'INT': 'int',
+
         # Possibly variable declaration or assignment keyword
         'IF': 'IF',             # If statement keyword
         'ELIF': 'ELIF',         # Else-if statement keyword
