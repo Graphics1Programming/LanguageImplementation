@@ -1,25 +1,33 @@
-# Stage 1: Arithmetic
+# Stage 1: Basic Calculator
+# Handles: Parenthesis, Unary negation, Binary addition, subtraction, multiplication, division
+
 1 - 2
 2.5 + 2.5 - 1.25
 (10 * 2) / 6
 8.5 / (2 * 9) - -3
+(3 + (4 - 2)) * 5
 
-# Stage 2: Boolean logic
+# Stage 2: Boolean Logic
+# Handles: Binary comparison, equality, inequality between numbers and booleans, Logical AND, OR, Unary negation of booleans
+
 true == false
 true != false
 (5 < 10)
 !(5 - 4 > 3 * 2 == !false)
-true and true
-false and true
-(0 < 1) or false
-false or false
+true and false
 
-# Stage 3: Text values and concatenation
+# Stage 3: Text Values
+# Handles: Binary concatenation of text values, Equality and inequality between text values
+
 "hello" + " " + "world"
 "foo" + "bar" == "foobar"
 "10 corgis" != "10" + "corgis"
+"0" + 1
+false == "false"
 
-# Stage 4: Global variables and print
+# Stage 4: Global Data
+# Handles: Creation, reading, display of named global variables, Stage 1-3 operations on globals with type consistency, Type conversion and error handling
+
 quickMaths = 10
 quickMaths = quickMaths + 2
 print quickMaths
@@ -36,9 +44,66 @@ errorTest = 5
 errorTest = errorTest + "insert string here"
 print errorTest
 
+testVar = 10
+testVar = "Now a string"
+print testVar
 
+# Stage 5: Control Flow
+# Handles: While loops, If-then statements, Nested while loops, If-then-else statements, Nested if-then-else statements
 
+# While Loop
+is_running = true
+shopping_list = ""
 
+while (is_running == true) {
+    item = input("add an item to the shopping list: ")
 
+    if (item == "") {
+        is_running = false
+    }
 
+    shopping_list = shopping_list + ", " + item
+}
 
+print shopping_list
+
+# If-Then Statement
+score = 75
+
+if (score >= 50) {
+    print("Passed")
+}
+
+# If-Then-Else Statement
+age = 18
+
+if (age >= 18) {
+    print("Adult")
+} else {
+    print("Minor")
+}
+
+# Nested If-Then-Else Statement
+num = 0
+
+if (num > 0) {
+    print("Positive")
+} else {
+    if (num < 0) {
+        print("Negative")
+    } else {
+        print("Zero")
+    }
+}
+
+# Nested While Loops
+i = 1
+
+while (i <= 3) {
+    j = 1
+    while (j <= 2) {
+        print("i: " + i + ", j: " + j)
+        j = j + 1
+    }
+    i = i + 1
+}
