@@ -27,8 +27,8 @@ class Evaluator:
         Rules differ based on operator type (e.g., PLUS allows strings or numbers).
         """
         if operator == 'PLUS':
-            # '+' supports string concatenation or numeric addition
-            if isinstance(a, str) and isinstance(b, str):
+            # Allow if either operand is string, allow coercion to string
+            if isinstance(a, str) or isinstance(b, str):
                 return True
             if isinstance(a, (int, float)) and isinstance(b, (int, float)):
                 return True
@@ -156,7 +156,10 @@ class Evaluator:
 
                 # Perform the actual operation based on operator type
                 if op_type == 'PLUS':
+                    if isinstance(left_val, str) or isinstance(right_val, str):
+                        return str(left_val) + str(right_val)
                     return left_val + right_val
+
                 elif op_type == 'MINUS':
                     return left_val - right_val
                 elif op_type == 'MUL':
