@@ -4,12 +4,15 @@ class Parser:
         self.current_token = None
         self.advance()
 
+    # Move to the next token
     def advance(self):
         self.current_token = self.scanner.get_next_token()
 
+    # Peek the upcoming token without consuming it
     def peek_next_token(self):
         return self.scanner.peek_next_token()
 
+    # ==== Core Parser Control ====
     def parse(self):
         statements = []
         while self.current_token.type != 'EOF':
@@ -17,15 +20,14 @@ class Parser:
             if stmt is not None:
                 statements.append(stmt)
             else:
-                # No statement returned, maybe block end or control token
-                break
+                break  # End of block or invalid token
         return ('BLOCK', statements)
 
+    # ==== Statement Dispatcher ====
     def statement(self):
-
         if self.current_token.type == 'RBRACE':
-            # End of current block, return control to parse_block()
-            return None
+            return None  # End of block
+
         if self.current_token.type == 'MAKE':
             return self.make_statement()
         elif self.current_token.type == 'DEL':
@@ -43,20 +45,20 @@ class Parser:
             next_token = self.peek_next_token()
             if next_token.type == 'ASSIGN':
                 var_token = self.current_token
-                self.advance()
-                self.advance()
+                self.advance()  # VARIABLE
+                self.advance()  # ASSIGN
                 expr = self.boolean_expression()
                 return ('ASSIGN', var_token, expr)
             else:
                 return self.boolean_expression()
         elif self.current_token.type in ('ELSE', 'ELIF'):
-            # Don't parse expression on else/elif, control should return to if_statements()
-            return None
+            return None  # handled in if_statements()
         else:
             return self.boolean_expression()
 
+    # ==== Specific Statement Parsers ====
     def make_statement(self):
-        self.advance()
+        self.advance()  # consume 'MAKE'
         if self.current_token.type != 'VARIABLE':
             raise ValueError("Expected variable name after 'make'")
         var_token = self.current_token
@@ -68,7 +70,7 @@ class Parser:
         return ('ASSIGN', var_token, expr)
 
     def del_statement(self):
-        self.advance()
+        self.advance()  # consume 'DEL'
         if self.current_token.type != 'VARIABLE':
             raise ValueError("Expected variable name after 'del'")
         var_token = self.current_token
@@ -76,7 +78,7 @@ class Parser:
         return ('DEL', var_token)
 
     def print_statement(self):
-        self.advance()
+        self.advance()  # consume 'PRINT'
         expr = self.boolean_expression()
         return ('PRINT', expr)
 
@@ -86,7 +88,6 @@ class Parser:
 
         self.advance()  # consume '{'
         statements = []
-
         while self.current_token.type != 'RBRACE':
             if self.current_token.type == 'EOF':
                 raise ValueError("Expected '}' before EOF")
@@ -95,24 +96,18 @@ class Parser:
             if stmt is not None:
                 statements.append(stmt)
             else:
-                # If statement() returns None, it means we hit a '}' or invalid token
                 break
 
         self.advance()  # consume '}'
+        return statements[0] if len(statements) == 1 else ('BLOCK', statements)
 
-        if len(statements) == 1:
-            return statements[0]
-        else:
-            return ('BLOCK', statements)
-
+    # ==== Conditional & Loop Handling ====
     def if_statements(self):
         conditions = []
         actions = []
 
-        self.advance()  # consume 'if'
+        self.advance()  # consume 'IF'
         cond = self.boolean_expression()
-
-        # parse the block after if condition
         action = self.parse_block()
 
         conditions.append(cond)
@@ -133,14 +128,12 @@ class Parser:
         return ('IF', conditions, actions, else_action)
 
     def while_statement(self):
-        self.advance()  # consume 'while'
+        self.advance()  # consume 'WHILE'
         condition = self.boolean_expression()
-
         action = self.parse_block()
-
         return ('WHILE', condition, action)
 
-    # Boolean expressions with AND/OR
+    # ==== Boolean & Expression Parsing ====
     def boolean_expression(self):
         node = self.comp_expression()
         while self.current_token.type in ('AND', 'OR'):
@@ -175,13 +168,13 @@ class Parser:
             op = self.current_token
             self.advance()
             right = self.factor()
-            node = (op, node, right)  # left and right can be tokens or tuples (nodes)
+            node = (op, node, right)
         return node
 
+    # ==== Factors & Literals ====
     def factor(self):
         token = self.current_token
 
-        # Stop parsing factor on block delimiters or control tokens
         if token.type in ('RBRACE', 'LBRACE', 'ELSE', 'ELIF', 'EOF'):
             raise StopIteration("End of expression reached due to block delimiter or control token")
 
@@ -189,14 +182,13 @@ class Parser:
             self.advance()
             return token
 
-        # Handle both VARIABLE and INT token types for 'int' keyword
         elif token.type in ('VARIABLE', 'INT'):
             if token.value == 'int':
                 next_token = self.peek_next_token()
                 if next_token.type == 'LPAREN':
                     self.advance()  # consume 'int'
                     self.advance()  # consume '('
-                    expr = self.boolean_expression()  # parse expression inside int()
+                    expr = self.boolean_expression()
                     if self.current_token.type != 'RPAREN':
                         raise ValueError("Expected ')' after int() argument")
                     self.advance()  # consume ')'
@@ -228,6 +220,7 @@ class Parser:
         else:
             raise ValueError(f"Unexpected token in factor: {token}")
 
+    # ==== Input Expression ====
     def parse_input_expression(self):
         self.advance()  # consume 'INPUT'
         if self.current_token.type != 'LPAREN':

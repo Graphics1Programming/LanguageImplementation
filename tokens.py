@@ -1,66 +1,74 @@
 class Token:
-    # Mapping of token types to their display representations
-    # This dictionary helps translate token type names into
-    # human-readable forms, useful for debugging and output.
+    # Mapping of token types to their display representations.
+    # This is used for debugging and displaying tokens in human-readable form.
     TYPE_DISPLAY = {
-        # Groupings - used for syntax grouping in expressions/statements
-        'LPAREN': '(',          # Left parenthesis
-        'RPAREN': ')',          # Right parenthesis
-        'LBRACE': '{',          # Left braces
-        'RBRACE': '}',          # Right braces
-        'NUMBER': 'NUMBER',     # Integer numbers
-        'FLOAT': 'FLOAT',       # Floating point numbers
-        'STRING': 'STRING',     # String literals
-        'BOOL': 'BOOL',         # Boolean values (True/False)
-        'IDENTIFIER': 'IDENTIFIER',  # Names like variable/function identifiers
-        'VARIABLE': 'variable',       # Variable names (alternative identifier type)
+        # Groupings - delimiters for grouping expressions or blocks
+        'LPAREN': '(',           # Left parenthesis
+        'RPAREN': ')',           # Right parenthesis
+        'LBRACE': '{',           # Left brace
+        'RBRACE': '}',           # Right brace
 
-        # Operators - symbols for mathematical and logical operations
-        'PLUS': '+',            # Addition operator
-        'MINUS': '-',           # Subtraction operator
-        'MUL': '*',             # Multiplication operator
-        'DIV': '/',             # Division operator
-        'EQ': '==',             # Equality comparison operator
-        'NEQ': '!=',            # Not equal comparison operator
-        'LT': '<',              # Less than comparison operator
-        'GT': '>',              # Greater than comparison operator
-        'LTE': '<=',            # Less than or equal to comparison operator
-        'GTE': '>=',            # Greater than or equal to comparison operator
-        'QMARK_EQ': '?=',       # Custom operator, possibly conditional assignment
-        'MOD': '%',             # Modulus operator token
+        # Literal types
+        'NUMBER': 'NUMBER',      # Integer literal
+        'FLOAT': 'FLOAT',        # Floating-point literal
+        'STRING': 'STRING',      # String literal
+        'BOOL': 'BOOL',          # Boolean literal
+        'IDENTIFIER': 'IDENTIFIER',  # Generic identifier (e.g., variable or function name)
+        'VARIABLE': 'variable',      # Specific variable name (optional distinction)
 
-        # Logical operators for boolean logic
-        'AND': 'AND',           # Logical AND
-        'OR': 'OR',             # Logical OR
-        'NOT': 'NOT',           # Logical NOT
+        # Arithmetic operators
+        'PLUS': '+',             # Addition
+        'MINUS': '-',            # Subtraction
+        'MUL': '*',              # Multiplication
+        'DIV': '/',              # Division
+        'MOD': '%',              # Modulus
 
-        # Keywords and control flow commands for the language
-        'PRINT': 'PRINT',       # Print statement keyword
-        'MAKE': 'MAKE',
-        'INPUT': 'INPUT',
-        'INT': 'int',
+        # Comparison operators
+        'EQ': '==',              # Equal to
+        'NEQ': '!=',             # Not equal to
+        'LT': '<',               # Less than
+        'GT': '>',               # Greater than
+        'LTE': '<=',             # Less than or equal to
+        'GTE': '>=',             # Greater than or equal to
 
-        # Possibly variable declaration or assignment keyword
-        'IF': 'IF',             # If statement keyword
-        'ELIF': 'ELIF',         # Else-if statement keyword
-        'ELSE': 'ELSE',         # Else statement keyword
-        'WHILE': 'WHILE',       # While loop keyword
-        'BREAK': 'BREAK',       # Break statement keyword
+        # Custom/extended operators
+        'QMARK_EQ': '?=',        # Possibly a conditional assignment operator
 
-        # New keyword for deletion operations
-        'DEL': 'DEL',           # Delete keyword
+        # Logical operators
+        'AND': 'AND',            # Logical AND
+        'OR': 'OR',              # Logical OR
+        'NOT': 'NOT',            # Logical NOT
+
+        # Keywords / control flow
+        'PRINT': 'PRINT',        # Output statement
+        'MAKE': 'MAKE',          # Possibly for variable creation
+        'INPUT': 'INPUT',        # User input
+        'INT': 'int',            # Type keyword for integer conversion or declaration
+
+        'IF': 'IF',              # Conditional: if
+        'ELIF': 'ELIF',          # Else if
+        'ELSE': 'ELSE',          # Else
+        'WHILE': 'WHILE',        # While loop
+        'BREAK': 'BREAK',        # Break from loop
+
+        # Deletion
+        'DEL': 'DEL',            # Delete keyword
 
         # Special tokens
-        'ASSIGN': '=',          # Assignment operator
-        'EOF': 'EOF'            # End of file/input token
+        'ASSIGN': '=',           # Assignment operator
+        'EOF': 'EOF'             # End of input/file
     }
 
     def __init__(self, token_type, value=None):
         """
-        Initialize a Token instance.
-        :param token_type: The type of the token (must be in TYPE_DISPLAY).
-        :param value: The optional value associated with the token (e.g., number or string literal).
-        Raises ValueError if token_type is invalid.
+        Create a new token object.
+
+        Parameters:
+        - token_type (str): A key from TYPE_DISPLAY that identifies the token's type.
+        - value (optional): The associated value (e.g., actual number, string, etc.)
+
+        Raises:
+        - ValueError: If token_type is not recognised.
         """
         if token_type not in self.TYPE_DISPLAY:
             raise ValueError(f"Invalid token type: {token_type}")
@@ -69,19 +77,20 @@ class Token:
 
     def __repr__(self):
         """
-        Official string representation of the token.
-        Useful for debugging and logging.
+        Return the official string representation of the token.
         Example: Token(NUMBER, 123)
+        Useful for logging and debugging.
         """
         return f"Token({self.type}, {repr(self.value)})"
 
     def __str__(self):
         """
-        Informal string representation of the token.
-        Displays the token in a readable format.
-        For example:
-          - STRING tokens show as STRING("value")
-          - Other tokens show as their display name with value if present.
+        Return a human-readable string representation of the token.
+        Used in pretty printing or debugging output.
+
+        Examples:
+        - STRING("hello") for string tokens
+        - +(2) for a PLUS token with value 2 (if applicable)
         """
         display_type = self.TYPE_DISPLAY.get(self.type, self.type)
         if self.value is not None:

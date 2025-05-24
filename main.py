@@ -3,25 +3,41 @@ from parser import Parser
 from evaluator import Evaluator
 import os
 
-# Create one Evaluator instance globally to preserve variable state
+# Global Evaluator instance to retain variable states across expressions
 evaluator_instance = Evaluator()
 
+
 def clear_screen():
-    """Clear the terminal screen, works on Windows and Unix."""
+    """
+    Clears the terminal screen.
+    Supports both Windows ('cls') and Unix/Linux/Mac ('clear').
+    """
     os.system('cls' if os.name == 'nt' else 'clear')
     print("[Screen cleared]")
 
+
 def calculate(text):
     """
-    Process input text by scanning, parsing, and evaluating it.
-    Returns the evaluated result or raises an appropriate exception.
+    Performs the complete process of evaluating an input expression.
+
+    Steps:
+    1. Tokenize the input using Scanner
+    2. Parse tokens into an AST using Parser
+    3. Evaluate the AST using Evaluator
+
+    Parameters:
+    - text (str): The user input expression
+
+    Returns:
+    - The result of evaluation (any data type)
+
+    Raises:
+    - Exception: With appropriate error message if any stage fails
     """
     try:
         scanner = Scanner(text)
-        # Tokenize the input text
-        parser = Parser(scanner)         # Parse tokens into an abstract syntax tree (AST)
-        ast = parser.parse()             # Generate the AST
-        # Evaluate the AST using the global evaluator instance
+        parser = Parser(scanner)
+        ast = parser.parse()
         return evaluator_instance.evaluate(ast)
     except TypeError as te:
         raise Exception(f"Type mismatch error: {te}")
@@ -30,15 +46,18 @@ def calculate(text):
     except ValueError as ve:
         raise Exception(f"Value error: {ve}")
     except Exception as ex:
-        # General catch-all for unexpected errors during calculation
         raise Exception(f"Error while calculating expression: {ex}")
+
 
 def format_result(value):
     """
-    Format evaluated values for user-friendly output.
-    - Strings are quoted
-    - Booleans are lowercase 'true' or 'false'
-    - Other types are converted to string directly
+    Formats the result value into a user-friendly string.
+
+    Parameters:
+    - value (any): The result from evaluation
+
+    Returns:
+    - str: Formatted string
     """
     if isinstance(value, str):
         return f'"{value}"'
@@ -47,7 +66,18 @@ def format_result(value):
     else:
         return str(value)
 
+
 def read_multiline_input(prompt=">>> "):
+    """
+    Reads multi-line input from the user.
+    Continues reading until all braces are matched.
+
+    Parameters:
+    - prompt (str): The prompt string to display
+
+    Returns:
+    - str: Combined multi-line input
+    """
     lines = []
     open_braces = 0
     while True:
@@ -56,13 +86,14 @@ def read_multiline_input(prompt=">>> "):
         open_braces += line.count("{") - line.count("}")
         if open_braces <= 0 and line.strip() != "":
             break
-        prompt = "... "  # continuation prompt
+        prompt = "... "
     return "\n".join(lines)
+
 
 if __name__ == "__main__":
     import sys
 
-    # No command-line arguments: start interactive REPL mode
+    # Interactive Mode: No command-line arguments
     if len(sys.argv) == 1:
         print("Enter expressions (type 'exit' or 'quit' to stop, 'clear' to clear screen)")
         while True:
@@ -71,16 +102,15 @@ if __name__ == "__main__":
                 if not user_input:
                     continue
 
-                # Exit commands
+                # Handle special commands
                 if user_input.lower() in ('exit', 'quit'):
                     print("Exiting...")
                     break
-
-                # Clear screen command
                 if user_input.lower() == 'clear':
                     clear_screen()
                     continue
 
+                # Process and display result
                 try:
                     result = calculate(user_input)
                     if result is not None:
@@ -90,14 +120,14 @@ if __name__ == "__main__":
                     print(f"Error: {error}")
 
             except KeyboardInterrupt:
-                # Ignore Ctrl+C (do not exit)
+                # Prevent exiting on Ctrl+C
                 print("\nKeyboardInterrupt ignored. Use 'exit' or 'quit' to stop.")
 
-    # One command-line argument: treat as filename and execute line-by-line
+    # Script Mode: One argument passed (input file)
     elif len(sys.argv) == 2:
         try:
             with open(sys.argv[1]) as f:
-                text = f.read()  # read entire file content as a single string
+                text = f.read()
                 try:
                     result = calculate(text)
                     if result is not None:
@@ -108,5 +138,6 @@ if __name__ == "__main__":
         except FileNotFoundError:
             print(f"Error: File '{sys.argv[1]}' not found")
 
+    # Invalid usage
     else:
         print("Usage: python main.py [input_file]")
