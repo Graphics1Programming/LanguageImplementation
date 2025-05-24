@@ -20,6 +20,7 @@ class Scanner:
         'else':   ('ELSE', 'else'),
         'while':  ('WHILE', 'while'),
         'break':  ('BREAK', 'break'),
+        'continue': ('CONTINUE', 'continue'),
         'del':    ('DEL', 'del'),
         'input':  ('INPUT', 'input'),
         'int':    ('INT', 'int'),

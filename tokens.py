@@ -50,6 +50,7 @@ class Token:
         'ELSE': 'ELSE',          # Else
         'WHILE': 'WHILE',        # While loop
         'BREAK': 'BREAK',        # Break from loop
+        'CONTINUE': 'CONTINUE',   # Continue from loop
 
         # Deletion
         'DEL': 'DEL',            # Delete keyword

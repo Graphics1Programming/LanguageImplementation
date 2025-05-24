@@ -24,6 +24,9 @@ class BreakException(Exception):
     """Used to break out of a while loop."""
     pass
 
+class ContinueException(Exception):
+    pass
+
 
 class Evaluator:
     """
@@ -115,6 +118,8 @@ class Evaluator:
                         result = self._eval(node[2])
                     except BreakException:
                         break
+                    except ContinueException:
+                        continue
                 return result
 
             if tag == 'DEL':
@@ -123,6 +128,8 @@ class Evaluator:
 
             if tag == 'BREAK':
                 raise BreakException()
+            elif tag == 'CONTINUE':
+                raise ContinueException()
 
             if len(node) == 3:
                 op, left, right = node

@@ -41,6 +41,9 @@ class Parser:
         elif self.current_token.type == 'BREAK':
             self.advance()
             return ('BREAK',)
+        elif self.current_token.type == 'CONTINUE':
+            self.advance()
+            return ('CONTINUE',)
         elif self.current_token.type == 'VARIABLE':
             next_token = self.peek_next_token()
             if next_token.type == 'ASSIGN':
