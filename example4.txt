@@ -1,0 +1,31 @@
+# Stage 5: Control Statements
+
+# Nested If-Then-Else statement
+score = 75
+
+if score >= 90 {
+    print "Grade: A"
+} else {
+    if score >= 80 {
+        print "Grade: B"
+    } else {
+        if score >= 70 {
+            print "Grade: C"
+        } else {
+            print "Grade: F"                     #  Grade: C
+        }
+    }
+}
+
+# Another nested if-else example with multiple conditions
+hour = 14
+
+if hour < 12 {
+    print "Good morning"
+} else {
+    if hour < 18 {
+        print "Good afternoon"
+    } else {
+        print "Good evening"                       # Good afternoon
+    }
+}
