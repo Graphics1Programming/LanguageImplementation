@@ -7,7 +7,8 @@ and built-in operations like input/output, deletion, and type casting.
 from tokens import Token
 from scanner import Scanner
 from parser import Parser
-from data import Data
+from data import Data, List
+
 
 
 class VariableNotDefinedError(NameError):
@@ -47,16 +48,25 @@ class Evaluator:
         Check type compatibility for binary operations.
         """
         if operator == 'PLUS':
+            # Allow concatenation of two Lists
+            if isinstance(a, List) and isinstance(b, List):
+                return True
             if isinstance(a, str) or isinstance(b, str):
                 return True
             return isinstance(a, (int, float)) and isinstance(b, (int, float))
         elif operator in ('MINUS', 'MUL', 'DIV', 'MOD'):
+            # Disallow list with other types here
+            if isinstance(a, List) or isinstance(b, List):
+                return False
             return isinstance(a, (int, float)) and isinstance(b, (int, float))
         elif operator in ('AND', 'OR'):
             return isinstance(a, bool) and isinstance(b, bool)
         elif operator in ('EQ', 'NEQ'):
             return True  # allow any types for == and !=
         elif operator in ('LT', 'GT', 'LTE', 'GTE'):
+            # Do not support comparison of Lists with numbers or other types here
+            if isinstance(a, List) or isinstance(b, List):
+                return False
             return isinstance(a, (int, float)) and isinstance(b, (int, float))
         return True
 
@@ -82,6 +92,49 @@ class Evaluator:
                     return int(val)
                 except (ValueError, TypeError) as e:
                     raise TypeConversionError(f"Cannot cast to int: {e}")
+            if tag == 'LIST_LITERAL':
+                elements = [self._eval(elem) for elem in node[1]]
+                return List(elements)
+
+            if tag == 'LIST_ACCESS':
+                list_obj = self._eval(node[1])
+                if not isinstance(list_obj, List):
+                    raise TypeError("LIST_ACCESS requires a List object")
+                index = self._eval(node[2])
+                if not isinstance(index, int):
+                    raise TypeError("List index must be an integer")
+                return list_obj.get(index)
+
+            if tag == 'LIST_APPEND':
+                list_obj = self._eval(node[1])
+                if not isinstance(list_obj, List):
+                    raise TypeError("LIST_APPEND requires a List object")
+                value = self._eval(node[2])
+                list_obj.append(value)
+                return None
+
+            if tag == 'LIST_REMOVE':
+                list_obj = self._eval(node[1])
+                if not isinstance(list_obj, List):
+                    raise TypeError("LIST_REMOVE requires a List object")
+                index = self._eval(node[2])
+                if not isinstance(index, int):
+                    raise TypeError("List remove index must be an integer")
+                return list_obj.remove(index)
+
+            if tag == 'METHOD_CALL':
+                obj = self._eval(node[1])
+                method_token = node[2]
+                args_nodes = node[3]
+
+                method_name = method_token.value
+                args = [self._eval(arg) for arg in args_nodes]
+
+                method = getattr(obj, method_name, None)
+                if method is None or not callable(method):
+                    raise TypeError(f"Object of type {type(obj).__name__} has no method '{method_name}'")
+
+                return method(*args)
 
             if tag == 'BLOCK':
                 result = None
@@ -157,9 +210,13 @@ class Evaluator:
 
                 # Binary operation handling
                 if op_type == 'PLUS':
+                    if isinstance(left_val, List) and isinstance(right_val, List):
+                        # Return a new List with combined elements
+                        return List(left_val.elements + right_val.elements)
                     if isinstance(left_val, str) or isinstance(right_val, str):
                         return str(left_val) + str(right_val)
                     return left_val + right_val
+
                 elif op_type == 'MINUS':
                     return left_val - right_val
                 elif op_type == 'MUL':

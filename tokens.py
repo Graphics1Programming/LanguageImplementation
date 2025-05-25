@@ -7,6 +7,8 @@ class Token:
         'RPAREN': ')',           # Right parenthesis
         'LBRACE': '{',           # Left brace
         'RBRACE': '}',           # Right brace
+        'LSQUARE': '[',          # Left square bracket
+        'RSQUARE': ']',          # Right square bracket
 
         # Literal types
         'NUMBER': 'NUMBER',      # Integer literal
@@ -33,6 +35,9 @@ class Token:
 
         # Custom/extended operators
         'QMARK_EQ': '?=',        # Possibly a conditional assignment operator
+        'COMMA': ',',
+        'DOT': '.',
+        'COLON': ':',
 
         # Logical operators
         'AND': 'AND',            # Logical AND
@@ -44,6 +49,8 @@ class Token:
         'MAKE': 'MAKE',          # Possibly for variable creation
         'INPUT': 'INPUT',        # User input
         'INT': 'int',            # Type keyword for integer conversion or declaration
+        'IN': 'in',
+
 
         'IF': 'IF',              # Conditional: if
         'ELIF': 'ELIF',          # Else if
@@ -51,6 +58,7 @@ class Token:
         'WHILE': 'WHILE',        # While loop
         'BREAK': 'BREAK',        # Break from loop
         'CONTINUE': 'CONTINUE',   # Continue from loop
+        'FOR': 'FOR',             # For loop
 
         # Deletion
         'DEL': 'DEL',            # Delete keyword

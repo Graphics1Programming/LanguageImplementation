@@ -21,7 +21,7 @@ def calculate(text):
     Performs the complete process of evaluating an input expression.
 
     Steps:
-    1. Tokenize the input using Scanner
+    1. Tokenise the input using Scanner
     2. Parse tokens into an AST using Parser
     3. Evaluate the AST using Evaluator
 

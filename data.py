@@ -2,6 +2,29 @@
 class VariableNotDefinedError(Exception):
     pass
 
+class List:
+    def __init__(self, elements=None):
+        self.elements = elements if elements else []
+
+    def append(self, value):
+        self.elements.append(value)
+
+    def get(self, index):
+        if index < 0 or index >= len(self.elements):
+            raise IndexError("List index out of range")
+        return self.elements[index]
+
+    def remove(self, index):
+        if index < 0 or index >= len(self.elements):
+            raise IndexError("List index out of range")
+        return self.elements.pop(index)
+
+    def __repr__(self):
+        return f"List({self.elements})"
+
+    def __str__(self):
+        return "[" + ", ".join(str(e) for e in self.elements) + "]"
+
 class Data:
     def __init__(self):
         # Internal storage for variables (symbol table)

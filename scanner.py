@@ -19,11 +19,13 @@ class Scanner:
         'elif':   ('ELIF', 'elif'),
         'else':   ('ELSE', 'else'),
         'while':  ('WHILE', 'while'),
+        'for':     ('FOR', 'for'),
         'break':  ('BREAK', 'break'),
         'continue': ('CONTINUE', 'continue'),
         'del':    ('DEL', 'del'),
         'input':  ('INPUT', 'input'),
         'int':    ('INT', 'int'),
+        'in': ('IN', 'in'),
     }
 
     def __init__(self, text):
@@ -115,8 +117,8 @@ class Scanner:
         ops = [
             ('!=', 'NEQ'), ('==', 'EQ'), ('<=', 'LTE'), ('>=', 'GTE'), ('?=', 'QMARK_EQ'),
             ('!', 'NOT'), ('+', 'PLUS'), ('-', 'MINUS'), ('*', 'MUL'), ('/', 'DIV'),
-            ('%', 'MOD'), ('<', 'LT'), ('>', 'GT'), ('=', 'ASSIGN'),
-            ('(', 'LPAREN'), (')', 'RPAREN'), ('{', 'LBRACE'), ('}', 'RBRACE')
+            ('%', 'MOD'), ('<', 'LT'), ('>', 'GT'), ('=', 'ASSIGN'), ('.', 'DOT'), (':', 'COLON'),
+            ('(', 'LPAREN'), (')', 'RPAREN'), ('{', 'LBRACE'), ('}', 'RBRACE'), ('[', 'LSQUARE'), (']', 'RSQUARE'), (',', 'COMMA'),
         ]
 
         for symbol, token_type in ops:

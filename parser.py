@@ -111,6 +111,7 @@ class Parser:
 
         self.advance()  # consume 'IF'
         cond = self.boolean_expression()
+
         action = self.parse_block()
 
         conditions.append(cond)
@@ -126,6 +127,7 @@ class Parser:
         else_action = None
         if self.current_token.type == 'ELSE':
             self.advance()
+            # Removed colon check and advance
             else_action = self.parse_block()
 
         return ('IF', conditions, actions, else_action)
@@ -133,6 +135,7 @@ class Parser:
     def while_statement(self):
         self.advance()  # consume 'WHILE'
         condition = self.boolean_expression()
+
         action = self.parse_block()
         return ('WHILE', condition, action)
 
@@ -178,6 +181,7 @@ class Parser:
     def factor(self):
         token = self.current_token
 
+
         if token.type in ('RBRACE', 'LBRACE', 'ELSE', 'ELIF', 'EOF'):
             raise StopIteration("End of expression reached due to block delimiter or control token")
 
@@ -198,18 +202,104 @@ class Parser:
                     return ('INT_CAST', expr)
                 else:
                     self.advance()
-                    return token
+                    node = token
+
+                    # Handle list access variable[expr]
+                    while self.current_token.type == 'LSQUARE':
+                        self.advance()  # consume '['
+                        index_expr = self.boolean_expression()
+                        if self.current_token.type != 'RSQUARE':
+                            raise ValueError("Expected ']' after list index")
+                        self.advance()  # consume ']'
+                        node = ('LIST_ACCESS', node, index_expr)
+
+                    # --- Handle method calls obj.method(args) ---
+                    while self.current_token.type == 'DOT':
+                        self.advance()  # consume '.'
+
+                        if self.current_token.type != 'VARIABLE':
+                            raise ValueError("Expected method name after '.'")
+
+                        method_name = self.current_token
+                        self.advance()  # consume method name
+
+                        if self.current_token.type != 'LPAREN':
+                            raise ValueError("Expected '(' after method name")
+
+                        self.advance()  # consume '('
+
+                        args = []
+                        if self.current_token.type != 'RPAREN':  # if method has args
+                            args.append(self.boolean_expression())
+                            while self.current_token.type == 'COMMA':
+                                self.advance()  # consume ','
+                                args.append(self.boolean_expression())
+
+                        if self.current_token.type != 'RPAREN':
+                            raise ValueError("Expected ')' after method arguments")
+
+                        self.advance()  # consume ')'
+
+                        node = ('METHOD_CALL', node, method_name, args)
+
+                    return node
+
             else:
                 self.advance()
-                return token
+                node = token
+
+                # Handle list access variable[expr]
+                while self.current_token.type == 'LSQUARE':
+                    self.advance()  # consume '['
+                    index_expr = self.boolean_expression()
+                    if self.current_token.type != 'RSQUARE':
+                        raise ValueError("Expected ']' after list index")
+                    self.advance()  # consume ']'
+                    node = ('LIST_ACCESS', node, index_expr)
+
+                # --- Handle method calls obj.method(args) ---
+                while self.current_token.type == 'DOT':
+                    self.advance()  # consume '.'
+
+                    if self.current_token.type != 'VARIABLE':
+                        raise ValueError("Expected method name after '.'")
+
+                    method_name = self.current_token
+                    self.advance()  # consume method name
+
+                    if self.current_token.type != 'LPAREN':
+                        raise ValueError("Expected '(' after method name")
+
+                    self.advance()  # consume '('
+
+                    args = []
+                    if self.current_token.type != 'RPAREN':  # if method has args
+                        args.append(self.boolean_expression())
+                        while self.current_token.type == 'COMMA':
+                            self.advance()  # consume ','
+                            args.append(self.boolean_expression())
+
+                    if self.current_token.type != 'RPAREN':
+                        raise ValueError("Expected ')' after method arguments")
+
+                    self.advance()  # consume ')'
+
+                    node = ('METHOD_CALL', node, method_name, args)
+
+                return node
 
         elif token.type == 'LPAREN':
             self.advance()
+
             node = self.boolean_expression()
+
             if self.current_token.type != 'RPAREN':
                 raise ValueError("Expected ')'")
             self.advance()
             return node
+
+        elif token.type == 'LSQUARE':
+            return self.parse_list_literal()
 
         elif token.type in ('MINUS', 'NOT'):
             op = token
@@ -237,3 +327,19 @@ class Parser:
         self.advance()  # consume ')'
 
         return ('INPUT', prompt_expr)
+
+    def parse_list_literal(self):
+        self.advance()  # consume '['
+        elements = []
+
+        if self.current_token.type != 'RSQUARE':  # if not empty list
+            elements.append(self.boolean_expression())
+            while self.current_token.type == 'COMMA':
+                self.advance()  # consume ','
+                elements.append(self.boolean_expression())
+
+        if self.current_token.type != 'RSQUARE':
+            raise ValueError("Expected ']' to close list literal")
+        self.advance()  # consume ']'
+
+        return ('LIST_LITERAL', elements)
