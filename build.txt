@@ -24,13 +24,15 @@ Setup Instructions:
 -------------------
 1. Clone or download the repository to your local machine.
 2. Open the LDesign folder in PyCharm IDE.
-3. Ensure the Python interpreter is set to the virtual environment located at:
+3. Set the Python interpreter to the virtual environment located at:
    C:/Users/ldi/PycharmProjects/LDesign/.venv1/Scripts/python.exe
 4. All dependencies are pre-installed in the virtual environment; no additional packages are required.
 5. No extra environment variables or system configurations are necessary.
 
 Running the Project:
 --------------------
+Make sure the current working directory is set to the LDesign folder before running any commands.
+
 - To run the interpreter interactively, execute main.py from PyCharm or the command line:
   python main.py
 
