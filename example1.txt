@@ -1,0 +1,19 @@
+# Stage 1: Basic Calculator
+
+print (7.5 + 2.25) * 3           # 29.25
+print -3 + (6 * 2.0)             # 9.0
+print (9.0 / (3 + 0.5)) - 1.5    # 1.071428
+print ((4.0 - 1) * 2.5) / 5      # 1.5
+print ((6 - 4) + 3) * (2 - 1)    # 5
+
+# Stage 2: Boolean Logic
+
+print((3.2 + 1.8) == 5.0)         # True
+print(True != True)               # False
+print((7.5 > 2.5) and (1 < 2))    # True
+print(! ((8 / 4) <= 1))           # True
+print(False or (3 > 2))           # True
+print(((2 + 2) == 4) and True)    # True
+print(not (True == False))        # True
+
+
