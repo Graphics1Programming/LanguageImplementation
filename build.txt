@@ -1,0 +1,50 @@
+Build Instructions
+==================
+
+Date: 24 May 2025
+
+Project: LDesign - Programming Language Interpreter
+
+Programming Language and Version:
+---------------------------------
+Python 3.13
+
+Project Structure:
+------------------
+All source files (main.py, parser.py, scanner.py, tokens.py, evaluator.py, data.py)
+and example input files (input.txt, example1.txt to example5.txt) are located in a single folder named LDesign.
+
+Development Environment:
+------------------------
+- Operating System: Windows
+- IDE: PyCharm (supports Python 3.13)
+- Python virtual environment: .venv1 created and used by PyCharm
+
+Setup Instructions:
+-------------------
+1. Clone or download the repository to your local machine.
+2. Open the LDesign folder in PyCharm IDE.
+3. Ensure the Python interpreter is set to the virtual environment located at:
+   C:/Users/ldi/PycharmProjects/LDesign/.venv1/Scripts/python.exe
+4. All dependencies are pre-installed in the virtual environment; no additional packages are required.
+5. No extra environment variables or system configurations are necessary.
+
+Running the Project:
+--------------------
+- To run the interpreter interactively, execute main.py from PyCharm or the command line:
+  python main.py
+
+- To run a script file as input, provide the filename as an argument:
+  python main.py input.txt
+
+- Output will appear in the PyCharm run console or terminal.
+
+Input Handling:
+---------------
+- Interactive input through terminal prompt.
+- Scripted input via text files (e.g., input.txt).
+
+Command-line Arguments:
+-----------------------
+- The interpreter accepts one optional argument: the path to a script file to execute.
+- If no argument is provided, it runs in interactive mode.
