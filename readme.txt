@@ -72,6 +72,34 @@ Built-in Functions
 - int(expression) — convert to integer
 - del variable — delete a variable
 
+Output Behavior Note
+
+When running scripts containing multiple expressions without print statements, the interpreter only outputs the result of the last expression in the file. For example:
+
+1 - 1
+2 + 3
+5 - 6
+
+This will output only "-1" (the result of 5 - 6). To see outputs of all expressions, you must prefix each with a print statement, such as:
+
+print 1 - 1
+print 2 + 3
+print 5 - 6
+
+This ensures all intermediate results are displayed.
+
+Print Function Syntax
+
+The print function supports both formats with or without parentheses. For example, both:
+
+print 2 + 2
+
+and
+
+print(2 + 2)
+
+produce the output 4. This flexibility allows users to write print statements in either style.
+
 Example Programs
 
 The repository includes five example files, each demonstrating important aspects of the language.
