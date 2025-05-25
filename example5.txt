@@ -40,3 +40,35 @@ while true {
                                                        # Looping... counter = 2
 }
 
+# Stage 6: List Data Structure
+
+# 1. Back-insertion: add elements at the end of the list
+myList = []                 # start with empty list
+myList = myList + [10]
+myList = myList + [20]
+myList = myList + [30]
+print myList                # Expected: [10, 20, 30]
+
+# 2. Random access: access elements by their indices (0-based)
+first = myList[0]
+second = myList[1]
+print "First element: " + first      # Output: First element: 10
+print "Second element: " + second    # Output: Second element: 20
+
+# 3. Random removal: remove element at index 1 (removes '20')
+newList = []
+newList = newList + [myList[0]]    # element at index 0
+newList = newList + [myList[2]]    # element at index 2
+myList = newList
+print myList                       # Expected: [10, 30]
+
+# Additional: back-insert more elements after removal
+myList = myList + [40]
+myList = myList + [50]
+print myList                       # Expected: [10, 30, 40, 50]
+
+# Access last element (index 3)
+last = myList[3]
+print "Last element: " + last      # Output: Last element: 50
+
+
