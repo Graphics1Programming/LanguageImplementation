@@ -1,0 +1,37 @@
+# Stage 3: Text Values
+
+print "good" + " " + "evening"                          # good evening
+print "data" + "science" == "datascience"               # True
+print "42 cats" != "42" + "cats "                       #  True
+print "open" + "AI"                                      #  openAI
+print "machine" + " " + "learning" == "machinelearning"  # False
+
+# Stage 4: Global data (global variables)
+
+# Integer assignment and increment
+score = 42
+score = score + 8
+print score                                              # 50
+
+# Float and integer addition (type promotion)
+pi_approx = 3.14
+pi_approx = pi_approx + 1
+print pi_approx                                           # 4.14000000
+
+# String concatenation with integer (implicit conversion)
+welcome = "Year "
+welcome = welcome + 2025
+print welcome                                             # Year 2025
+
+# Adding string and float (implicit conversion)
+tempMessage = "Temperature is "
+tempMessage = tempMessage + 23.5
+print tempMessage                                        # Temperature is 23.5
+
+# Deleting a global variable
+note = "This message will be deleted"
+del note
+print note                    # Error: Error while calculating expression: Variable 'note' not defined.
+
+
+
