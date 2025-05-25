@@ -107,3 +107,28 @@ while (i <= 3) {
     }
     i = i + 1
 }
+
+# Stage 6: List Data Structure
+# # Handles: List creation, append, random removal by index, random access by index
+
+myList = []
+myList.append(10)
+myList.append(20)
+myList.append(30)
+print myList
+
+print myList[0]
+print myList[2]
+
+myList.remove(1)
+print myList
+
+myList.append("hello")
+print myList[2]
+
+myList.remove(0)
+print myList
+
+# Attempt to access an out-of-bounds index (should handle error or print something)
+print myList[10]
+
