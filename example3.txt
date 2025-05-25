@@ -1,0 +1,30 @@
+# Stage 5: Control Statements - example3.txt
+
+# Simple If statement
+temperature = 25
+
+if temperature > 30 {
+    print "It's hot outside."
+}
+
+if temperature <= 30 {
+    print "The weather is pleasant."
+}                                            # The weather is pleasant.
+
+# If-Then-Else statement
+age = 18
+
+if age >= 18 {
+    print "You are an adult."
+} else {
+    print "You are a minor."
+}                                              # You are an adult.
+
+# While loop
+count = 0
+
+while count < 5 {                             # Counting: 0
+    print "Counting: " + count                # Counting: 1
+    count = count + 1                         # Counting: 2
+}                                             # Counting: 3
+                                              # Counting: 4
