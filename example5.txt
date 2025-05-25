@@ -1,0 +1,42 @@
+# Stage 5: Control Statements with nested loops, break, and continue
+
+# Nested while loops with continue
+outer = 1
+
+while outer <= 3 {
+    inner = 0
+
+    while inner < 3 {
+        inner = inner + 1
+
+        if inner == 2 {
+            print "Skipping inner = 2"                # Skipping inner = 2
+            continue
+        }
+
+        print "Outer: " + outer + ", Inner: " + inner  # Outer: 1, Inner: 1 (1st loop)
+                                                       # Outer: 1, Inner: 3 (3rd loop)
+                                                       # Outer: 2, Inner: 1
+                                                       # Outer: 2, Inner: 3
+                                                       # Outer: 3, Inner: 1
+                                                       # Outer: 3, Inner: 3
+    }
+
+    outer = outer + 1
+}
+
+# If inside while with break simulation
+counter = 0
+
+while true {
+    counter = counter + 1
+
+    if counter == 3 {
+        print "Counter reached 3, breaking loop."      # Counter reached 3, breaking loop.
+        break
+    }
+
+    print "Looping... counter = " + counter            # Looping... counter = 1
+                                                       # Looping... counter = 2
+}
+
