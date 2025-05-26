@@ -1,6 +1,6 @@
 Mini Language Interpreter
 
-A small programming language interpreter built using Python 3.13. It supports variable assignments, basic arithmetic calculations, boolean logic, and text values. The interpreter manages a global data store for variables and offers full control flow features including nested if-else statements and while loops. Programs can be run line-by-line or from a script file.
+A small programming language interpreter built using Python 3.13. It supports variable assignments, basic arithmetic calculations, boolean logic, and text values. The interpreter includes limited support for list data structures with basic operations like appending and removing elements. It manages a global data store for variables and offers full control flow features including nested if-else statements and while loops. Programs can be run line-by-line or from a script file.
 
 Project Structure
 
@@ -11,7 +11,7 @@ The project is organised under the folder LDesign (for example, in PyCharm at C:
 - tokens.py — Defines token types used by the scanner and parser.
 - scanner.py — Tokenises the input source code into tokens.
 - parser.py — Parses tokens into an AST representing the program structure.
-- data.py — Manages the global storage for variables.
+- data.py — Manages the global storage for variables and list data structures.
 - input.txt — An example script file containing code to be executed by the interpreter.
 
 Features
@@ -20,6 +20,7 @@ Features
 - Basic calculations: Addition, subtraction, multiplication, division, modulus.
 - Boolean logic: and, or, not operations.
 - Text handling: String values and concatenation.
+- List data structure: Supports list literals, back-insertion via method calls (e.g., lst.append(4)), random removal using the remove keyword, and random access by numeric indices. Note that only method calls on list objects are supported; standalone function calls like append(lst, 4) will cause syntax errors.
 - Control flow: Supports nested if, else if, else blocks and while loops with break and continue support.
 - Built-in functions: input(), print(), int() for type conversion.
 - Variable deletion: del variable_name.
@@ -99,6 +100,13 @@ and
 print(2 + 2)
 
 produce the output 4. This flexibility allows users to write print statements in either style.
+
+Additional Notes on List Support and Control Flows
+
+- Lists are created using square brackets with comma-separated values, e.g., lst = [1, 2, 3].
+- List manipulation is supported through method calls only, e.g., lst.append(4). The parser does not support function-style calls like append(lst, 4).
+- To remove an item from a list, use the remove keyword instead of pop.
+- Attempts to add for loops with colon syntax and list support faced parsing challenges due to increased language complexity. The language currently supports nested if-else and while loops with break and continue as required by the project. Development is ongoing, and adding features naturally makes design more complex.
 
 Example Programs
 
